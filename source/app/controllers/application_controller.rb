@@ -1,0 +1,19 @@
+class ApplicationController < ActionController::Base
+  before_action :authenticate_user!
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
+  helper_method :pathway, :settings
+
+  def pathway  = current_user.pathway
+  def settings = AllIn::SETTINGS
+
+  protected
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up,        keys: %i[first_name last_name phone])
+    devise_parameter_sanitizer.permit(:account_update, keys: %i[first_name last_name phone])
+  end
+
+  def after_sign_in_path_for(_resource) = root_path
+  def after_sign_up_path_for(_resource) = root_path
+end

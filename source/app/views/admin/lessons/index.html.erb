@@ -1,0 +1,16 @@
+<h1 class="text-2xl font-extrabold">Lessons</h1>
+<p class="text-mute text-sm mt-1">Order, titles, Vimeo IDs, thumbnails and text. Assessment questions are edited via <code>db/seeds.rb</code> or the Rails console (see README).</p>
+<table class="mt-6 w-full text-sm">
+  <thead class="text-mute text-left"><tr><th class="py-2">#</th><th>Title</th><th>Kind</th><th>Vimeo ID</th><th>Thumb</th><th>Published</th><th></th></tr></thead>
+  <tbody>
+    <% @lessons.each do |l| %>
+      <tr class="border-t border-line">
+        <td class="py-2"><%= l.position %></td><td><%= l.title %></td><td><%= l.kind %></td>
+        <td><%= l.vimeo_id.presence || tag.span("missing", class: "text-red-300") %></td>
+        <td><%= l.thumbnail.attached? ? "yes" : tag.span("none", class: "text-mute") %></td>
+        <td><%= l.published ? "yes" : "no" %></td>
+        <td class="text-right"><%= link_to "Edit", edit_admin_lesson_path(l), class: "btn-link" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

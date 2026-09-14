@@ -1,0 +1,21 @@
+<header class="border-b border-line/70">
+  <div class="mx-auto max-w-6xl px-5 h-16 flex items-center">
+    <%= link_to root_path, class: "flex items-baseline gap-1.5 text-ink hover:text-white", aria: { label: "All In home" } do %>
+      <span class="text-xl font-extrabold tracking-tight">all in<span class="text-royal">.</span></span>
+    <% end %>
+    <nav class="ml-auto flex items-center gap-5 text-sm font-semibold">
+      <%= link_to "FAQ", faq_path, class: "btn-link" %>
+      <% if user_signed_in? %>
+        <%= link_to "My Progress", my_progress_path, class: "btn-link" %>
+        <%= link_to "Account", edit_user_registration_path, class: "btn-link" %>
+        <%= link_to "Admin", admin_root_path, class: "btn-link" if current_user.admin? %>
+        <%= button_to user_session_path, method: :delete, class: "h-9 w-9 rounded-full bg-panel border border-line text-xs font-extrabold text-ink hover:border-royal", title: "Sign out #{current_user.full_name}" do %>
+          <%= current_user.initials %>
+        <% end %>
+      <% else %>
+        <%= link_to "Sign in", new_user_session_path, class: "btn-link" %>
+        <%= link_to "Start", new_user_registration_path, class: "btn-go !py-2 !px-4" %>
+      <% end %>
+    </nav>
+  </div>
+</header>

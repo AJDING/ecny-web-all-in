@@ -1,0 +1,13 @@
+<%# lesson: Lesson (may be nil); size: tailwind sizing classes %>
+<div class="thumb <%= size %> relative">
+  <% if lesson&.thumbnail&.attached? %>
+    <%= image_tag lesson.thumbnail_variant, alt: "", class: "h-full w-full object-cover" %>
+  <% else %>
+    <div class="h-full w-full bg-gradient-to-br from-royalink to-night"></div>
+  <% end %>
+  <span class="absolute inset-0 flex items-center justify-center">
+    <span class="h-10 w-10 rounded-full border-2 border-white/80 flex items-center justify-center text-white">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    </span>
+  </span>
+</div>

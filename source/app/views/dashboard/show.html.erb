@@ -1,0 +1,28 @@
+<% page_title "My Next Step" %>
+<div class="wrap">
+  <h1 class="h-page">My Next Step</h1>
+  <p class="text-center text-mute mt-2">Hi <%= current_user.first_name %>. Pick up right where you left off.</p>
+
+  <div class="card mt-8 p-6 md:p-8 md:flex md:gap-8 md:items-center">
+    <%= render "shared/lesson_thumb", lesson: @next[:thumb], size: "h-44 md:h-40 md:w-64" %>
+    <div class="mt-5 md:mt-0 flex-1">
+      <p class="kicker">STEP <%= @next[:step].ordinal_word.upcase %></p>
+      <h2 class="h-step mt-1"><%= @next[:step].title %></h2>
+      <p class="lead mt-3"><%= @next[:step].description %></p>
+      <div class="mt-6 flex items-center justify-between">
+        <span class="text-sm font-semibold text-mute"><%= @next[:progress] %></span>
+        <% if @next[:lesson] %>
+          <%= link_to @next[:cta], lesson_path(@next[:lesson]), class: "btn-go" %>
+        <% elsif @next[:assessment] %>
+          <%= link_to @next[:cta], assessment_path(@next[:assessment]), class: "btn-go" %>
+        <% elsif @next[:appointment] %>
+          <%= link_to @next[:cta], appointment_path, class: "btn-go" %>
+        <% else %>
+          <%= link_to @next[:cta], my_plan_path, class: "btn-go" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-center mt-6"><%= link_to "See the whole pathway", my_progress_path, class: "btn-link" %></p>
+</div>

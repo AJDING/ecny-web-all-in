@@ -1,0 +1,11 @@
+<% page_title "Choose a new password" %>
+<div class="mx-auto max-w-md px-5">
+  <h1 class="h-page">Choose a new password</h1>
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "card mt-8 p-6 md:p-8 space-y-5" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <%= f.hidden_field :reset_password_token %>
+    <div><%= f.label :password, "New password", class: "label" %><%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "field" %></div>
+    <div><%= f.label :password_confirmation, "Confirm new password", class: "label" %><%= f.password_field :password_confirmation, autocomplete: "new-password", class: "field" %></div>
+    <%= f.submit "Save new password", class: "btn-go w-full" %>
+  <% end %>
+</div>

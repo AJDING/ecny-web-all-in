@@ -1,0 +1,33 @@
+<% page_title "FAQ" %>
+<div class="wrap">
+  <h1 class="h-page">Frequently Asked Questions</h1>
+  <div class="card mt-8 p-6 md:p-8 space-y-8">
+    <% [
+      ["What is All In?",
+       "All In is #{settings[:church_name]}'s pathway for new people. In three short steps you'll hear our story, discover how you're designed, and meet with someone from our team to find your place here."],
+      ["How long does it take?",
+       "Step One is a handful of short videos you can watch on your own schedule. Step Two is three quick assessments — most people finish in about 30 minutes total. Step Three is a single appointment."],
+      ["I've completed Steps One and Two, but Step Three is still locked.",
+       "Step Three unlocks once all three assessments show Complete on My Progress. If they do and it's still locked, sign out and back in, or email us and we'll take a look."],
+      ["Can my spouse and I go through All In together?",
+       "Yes — watch the videos together if you like, but each of you should create your own account so your assessment results stay separate. You're welcome to book one appointment together."],
+      ["I can't make it in person. Can I still have my appointment?",
+       "Yes. When you book, choose phone or video. On the day of your appointment you'll get an email with how to join and a link to your Personal Ministry Plan so you can follow along."],
+      ["I'm part of another church. Can I still go through All In?",
+       "You're welcome to watch the videos and learn about us. If you're committed to another local church, we'd encourage you to stay planted, serve, and give there — and keep joining us online any time."],
+      ["I need to reschedule.",
+       "Use the reschedule link in your booking confirmation email. If you can't find it, email #{settings[:church_email]} and we'll move it for you."],
+      ["I need to update my email or phone number.",
+       "Click Account at the top right, change your details, and save."],
+      ["Can I delete my account?",
+       "Yes. Email #{settings[:church_email]} and someone from the All In team will remove it."],
+      ["I have a question that isn't listed here.",
+       "Email #{settings[:church_email]} — a real person reads it."]
+    ].each do |q, a| %>
+      <div>
+        <h2 class="text-lg font-extrabold leading-snug"><%= q %></h2>
+        <p class="text-mute mt-2 leading-relaxed max-w-[70ch]"><%= a %></p>
+      </div>
+    <% end %>
+  </div>
+</div>

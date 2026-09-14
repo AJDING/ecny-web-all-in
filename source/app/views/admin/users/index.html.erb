@@ -1,0 +1,21 @@
+<div class="flex items-center justify-between gap-4">
+  <h1 class="text-2xl font-extrabold">People</h1>
+  <%= form_with url: admin_users_path, method: :get, class: "flex gap-2" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Search name or email", class: "field !py-2 w-64" %>
+    <%= f.submit "Search", class: "btn-ghost" %>
+  <% end %>
+</div>
+<table class="mt-6 w-full text-sm">
+  <thead class="text-mute text-left"><tr><th class="py-2">Name</th><th>Email</th><th>Phone</th><th>Progress</th><th>Joined</th></tr></thead>
+  <tbody>
+    <% @users.each do |u| %>
+      <% p = Pathway.new(u) %>
+      <tr class="border-t border-line">
+        <td class="py-2"><%= link_to u.full_name, admin_user_path(u) %><%= " · admin" if u.admin? %></td>
+        <td><%= u.email %></td><td><%= u.phone %></td>
+        <td><div class="flex items-center gap-2"><div class="bar w-24"><span style="width:<%= p.percent %>%"></span></div><span class="text-mute"><%= p.percent %>%</span></div></td>
+        <td class="text-mute"><%= l u.created_at, format: :short %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

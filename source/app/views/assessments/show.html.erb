@@ -1,0 +1,28 @@
+<% page_title @assessment.title %>
+<div class="wrap">
+  <p class="kicker text-center">STEP TWO</p>
+  <h1 class="h-step text-center mt-1"><%= @assessment.title %></h1>
+  <p class="lead text-center mt-3 max-w-[60ch] mx-auto"><%= @assessment.intro.presence || @assessment.description %></p>
+
+  <%= form_with url: assessment_path(@assessment), method: :post, class: "card mt-8 p-5 md:p-8",
+        data: { controller: "assessment", assessment_total_value: @questions.size, action: "change->assessment#update" } do |f| %>
+    <p class="text-sm text-mute mb-6">Answer honestly, not aspirationally. There are no wrong answers. Scale: <%= AssessmentResult::SCALE.values.join(" · ") %>.</p>
+    <ol class="space-y-7">
+      <% @questions.each_with_index do |q, i| %>
+        <li>
+          <p class="font-semibold leading-snug"><span class="text-mute mr-2"><%= i + 1 %>.</span><%= q.text %></p>
+          <div class="likert" role="radiogroup" aria-label="Question <%= i + 1 %>">
+            <% AssessmentResult::SCALE.each do |val, word| %>
+              <% checked = @existing&.answers&.dig(q.id.to_s) == val %>
+              <label><input type="radio" name="answers[<%= q.id %>]" value="<%= val %>" <%= "checked" if checked %> required><%= word %></label>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+    <div class="mt-8 flex items-center justify-between">
+      <span class="text-sm text-mute" data-assessment-target="counter"></span>
+      <%= f.submit "See my results", class: "btn-go", data: { assessment_target: "submit" } %>
+    </div>
+  <% end %>
+</div>

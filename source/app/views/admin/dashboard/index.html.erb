@@ -1,0 +1,26 @@
+<h1 class="text-2xl font-extrabold">Overview</h1>
+<div class="mt-6 grid gap-4 sm:grid-cols-3">
+  <% [["People registered", @users_count], ["Finished All In", @completed_count], ["Appointments scheduled", @scheduled_count]].each do |label, n| %>
+    <div class="card p-5"><p class="text-sm text-mute"><%= label %></p><p class="text-3xl font-extrabold mt-1"><%= n %></p></div>
+  <% end %>
+</div>
+<h2 class="text-lg font-extrabold mt-10">Lessons</h2>
+<table class="mt-3 w-full text-sm">
+  <thead class="text-mute text-left"><tr><th class="py-2">#</th><th>Title</th><th>Kind</th><th>Vimeo</th><th>Published</th><th></th></tr></thead>
+  <tbody>
+    <% @lessons.each do |l| %>
+      <tr class="border-t border-line">
+        <td class="py-2"><%= l.position %></td><td><%= l.title %></td><td><%= l.kind %></td>
+        <td><%= l.vimeo_id.presence || tag.span("missing", class: "text-red-300") %></td>
+        <td><%= l.published ? "yes" : "no" %></td>
+        <td class="text-right"><%= link_to "Edit", edit_admin_lesson_path(l), class: "btn-link" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<h2 class="text-lg font-extrabold mt-10">Recent sign-ups</h2>
+<ul class="mt-3 divide-y divide-line text-sm">
+  <% @recent_users.each do |u| %>
+    <li class="py-2 flex justify-between"><%= link_to u.full_name, admin_user_path(u) %><span class="text-mute"><%= l u.created_at, format: :short %></span></li>
+  <% end %>
+</ul>

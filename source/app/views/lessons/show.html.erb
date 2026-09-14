@@ -1,0 +1,53 @@
+<% page_title @lesson.title %>
+<div class="wrap">
+  <p class="kicker text-center">STEP ONE</p>
+  <h1 class="h-step text-center mt-1"><%= @lesson.step.title %></h1>
+
+  <div class="card mt-8 p-4 md:p-6"
+       data-controller="vimeo"
+       data-vimeo-complete-url-value="<%= complete_lesson_path(@lesson) %>"
+       data-vimeo-completed-value="<%= @complete %>"
+       data-vimeo-next-url-value="<%= @next ? lesson_path(@next) : my_progress_path %>">
+
+    <h2 class="text-xl font-extrabold"><%= @lesson.title %></h2>
+    <p class="text-mute text-sm mt-1"><%= @lesson.description %></p>
+
+    <% if @lesson.video? %>
+      <div class="video mt-5">
+        <% if @lesson.video_ready? %>
+          <iframe data-vimeo-target="frame" src="<%= @lesson.vimeo_embed_url %>" title="<%= @lesson.title %>"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write" allowfullscreen></iframe>
+        <% else %>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+            <p class="font-bold">Video coming soon</p>
+            <p class="text-sm text-mute mt-1">This lesson's video hasn't been added yet.</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @lesson.body.present? %>
+      <div class="prose-ink mt-6 max-w-[68ch]"><%= render_body(@lesson.body) %></div>
+    <% end %>
+
+    <div class="mt-6 flex items-center justify-between">
+      <% if @previous %>
+        <%= link_to "Back", lesson_path(@previous), class: "btn-ghost" %>
+      <% else %>
+        <%= link_to "Back", my_progress_path, class: "btn-ghost" %>
+      <% end %>
+      <span class="text-sm font-semibold text-mute" data-vimeo-target="status"><%= @complete ? "Complete" : "#{@index}/#{@total}" %></span>
+
+      <% if @complete %>
+        <%= link_to "Next", (@next ? lesson_path(@next) : my_progress_path), class: "btn-go" %>
+      <% elsif @lesson.video? && @lesson.video_ready? %>
+        <%# Enabled by the Stimulus controller when the video ends. %>
+        <a href="#" class="btn-go pointer-events-none opacity-50" data-vimeo-target="next" disabled aria-disabled="true"
+           onclick="if(this.hasAttribute('disabled'))return false;" data-turbo="true">Next</a>
+      <% else %>
+        <%# Text lesson (or video not uploaded yet): Next marks it complete. %>
+        <%= button_to "Next", complete_lesson_path(@lesson), method: :post, class: "btn-go", form_class: "inline" %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= page_title %></title>
+    <meta name="description" content="All In — the new-people pathway at <%= settings[:church_name] %>.">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <script src="https://player.vimeo.com/api/player.js"></script>
+  </head>
+  <body class="min-h-full flex flex-col">
+    <%= render "shared/nav" %>
+    <% if notice %><div class="flash-notice"><%= notice %></div><% end %>
+    <% if alert  %><div class="flash-alert"><%= alert %></div><% end %>
+    <main class="flex-1 py-10 md:py-14">
+      <%= yield %>
+    </main>
+    <%= render "shared/footer" %>
+  </body>
+</html>

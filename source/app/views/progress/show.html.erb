@@ -1,0 +1,91 @@
+<% page_title "My Progress" %>
+<div class="wrap">
+  <h1 class="h-page">My Progress</h1>
+  <div class="mx-auto mt-4 max-w-xs">
+    <div class="bar" role="progressbar" aria-valuenow="<%= pathway.percent %>" aria-valuemin="0" aria-valuemax="100"><span style="width:<%= pathway.percent %>%"></span></div>
+    <p class="text-center text-xs text-mute mt-2"><%= pathway.percent %>% of the way in</p>
+  </div>
+
+  <%# ---- Step One ---- %>
+  <section class="card mt-10 p-6 md:p-8">
+    <p class="kicker">STEP ONE</p>
+    <h2 class="h-step mt-1"><%= pathway.learn_step.title %></h2>
+    <p class="lead mt-2"><%= pathway.learn_step.description %></p>
+    <div class="rail mt-6">
+      <% pathway.lesson_items.each do |item| %>
+        <% l = item.record %>
+        <div class="rail-row">
+          <span class="node <%= { complete: "node-done", current: "node-go" }[item.status] %>">
+            <% if item.status == :complete %><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><% end %>
+          </span>
+          <%= render "shared/lesson_thumb", lesson: l, size: "" %>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold leading-snug"><%= item.status == :locked ? l.title : link_to(l.title, lesson_path(l), class: "text-ink hover:text-glow") %></h3>
+            <p class="text-sm text-mute mt-1"><%= l.description %></p>
+          </div>
+          <div class="shrink-0 pt-1">
+            <% if item.status == :current %>
+              <%= link_to "Continue", lesson_path(l), class: "pill pill-go" %>
+            <% else %>
+              <%= status_pill(item.status) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# ---- Step Two ---- %>
+  <section class="card mt-6 p-6 md:p-8">
+    <p class="kicker">STEP TWO</p>
+    <h2 class="h-step mt-1"><%= pathway.assess_step.title %></h2>
+    <p class="lead mt-2"><%= pathway.assess_step.description %></p>
+    <div class="rail mt-6">
+      <% pathway.assessment_items.each do |item| %>
+        <% a = item.record %>
+        <div class="rail-row">
+          <span class="node <%= { complete: "node-done", current: "node-go" }[item.status] %>">
+            <% if item.status == :complete %><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><% end %>
+          </span>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold"><%= item.status == :locked ? a.title : link_to(a.title, (item.status == :complete ? results_assessment_path(a) : assessment_path(a)), class: "text-ink hover:text-glow") %></h3>
+            <p class="text-sm text-mute mt-1"><%= a.question_count %> questions</p>
+          </div>
+          <div class="shrink-0 pt-1">
+            <% if item.status == :current %>
+              <%= link_to "Begin", assessment_path(a), class: "pill pill-go" %>
+            <% elsif item.status == :complete %>
+              <%= link_to "Results", results_assessment_path(a), class: "pill pill-done underline" %>
+            <% else %>
+              <%= status_pill(:locked) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <% if pathway.assess_complete? %>
+      <p class="mt-5"><%= link_to "View my Personal Ministry Plan", my_plan_path, class: "btn-ghost" %></p>
+    <% end %>
+  </section>
+
+  <%# ---- Step Three ---- %>
+  <section class="card mt-6 p-6 md:p-8">
+    <p class="kicker">STEP THREE</p>
+    <h2 class="h-step mt-1"><%= pathway.meet_step.title %></h2>
+    <p class="lead mt-2"><%= pathway.meet_step.description %></p>
+    <div class="mt-6 flex items-center justify-between gap-4">
+      <p class="text-sm text-mute">
+        <% if pathway.complete? %>You're all in. We'll see you at your appointment.
+        <% elsif pathway.meet_unlocked? %>Everything is unlocked. Pick a time that works for you.
+        <% else %>You can schedule your appointment after you have completed all of the other steps.<% end %>
+      </p>
+      <% if pathway.complete? %>
+        <%= link_to "Details", appointment_path, class: "pill pill-done underline" %>
+      <% elsif pathway.meet_unlocked? %>
+        <%= link_to "Schedule", appointment_path, class: "pill pill-go" %>
+      <% else %>
+        <%= status_pill(:locked) %>
+      <% end %>
+    </div>
+  </section>
+</div>

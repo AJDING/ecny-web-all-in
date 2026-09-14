@@ -1,0 +1,5 @@
+<footer class="py-10 text-center text-xs text-mute space-y-2">
+  <p>Need help? <%= mail_to settings[:church_email], "Contact the All In team" %></p>
+  <p><%= link_to "Terms of Service", terms_path %> &nbsp;|&nbsp; <%= link_to "Privacy Policy", privacy_path %></p>
+  <p>&copy; <%= Date.current.year %>, <%= settings[:church_name] %></p>
+</footer>

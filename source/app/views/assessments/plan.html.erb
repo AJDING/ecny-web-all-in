@@ -1,0 +1,30 @@
+<% page_title "My Personal Ministry Plan" %>
+<div class="wrap">
+  <h1 class="h-page">Personal Ministry Plan</h1>
+  <p class="text-center text-mute mt-2"><%= current_user.full_name %> &middot; bring this to your All In appointment</p>
+
+  <% if @results.empty? %>
+    <div class="card mt-8 p-8 text-center">
+      <p class="font-bold">No results yet</p>
+      <p class="text-mute mt-1">Finish the three assessments in Step Two and your plan appears here.</p>
+      <p class="mt-5"><%= link_to "Go to My Progress", my_progress_path, class: "btn-go" %></p>
+    </div>
+  <% else %>
+    <% @results.each do |r| %>
+      <section class="card mt-6 p-6 md:p-8">
+        <h2 class="text-xl font-extrabold"><%= r.assessment.title %></h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-3">
+          <% r.top.each do |cat, score| %>
+            <% info = r.assessment.category_info(cat) %>
+            <div class="rounded-xl border border-line bg-panel/60 p-4">
+              <div class="flex justify-between text-sm"><span class="font-bold"><%= cat %></span><span class="text-glow"><%= score %>%</span></div>
+              <p class="text-xs text-mute mt-2 leading-relaxed"><%= info[:summary].to_s.truncate(160) %></p>
+            </div>
+          <% end %>
+        </div>
+        <p class="mt-3 text-right"><%= link_to "Full results", results_assessment_path(r.assessment), class: "btn-link" %></p>
+      </section>
+    <% end %>
+    <p class="mt-8 text-center"><%= link_to "Back to My Progress", my_progress_path, class: "btn-ghost" %></p>
+  <% end %>
+</div>

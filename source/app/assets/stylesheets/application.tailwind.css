@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Theme: Encounter black + dark blue ----------
+   night  #050914  page background
+   deep   #0B1326  surfaces
+   panel  #111C36  raised / inputs
+   line   #1E2B4D  borders
+   royal  #3B6FE8  Encounter blue (actions, current step)
+   The one memorable element is the pathway rail on My Progress:
+   a vertical line that fills blue as lessons are completed. */
+
+@layer base {
+  html { color-scheme: dark; }
+  body { @apply bg-night text-ink font-sans antialiased; }
+  body::before { /* soft blue haze at the top, like the church site hero */
+    content: ""; position: fixed; inset: 0 0 auto 0; height: 60vh; pointer-events: none; z-index: -1;
+    background: radial-gradient(60% 50% at 50% 0%, rgba(59,111,232,.22), transparent 70%);
+  }
+  a { @apply text-glow hover:text-white; }
+  :focus-visible { @apply outline-none ring-2 ring-royal ring-offset-2 ring-offset-night; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+}
+
+@layer components {
+  .wrap      { @apply mx-auto w-full max-w-3xl px-5; }
+  .card      { @apply bg-deep border border-line rounded-2xl; }
+  .h-page    { @apply text-3xl md:text-4xl font-extrabold tracking-tight text-center; }
+  .h-step    { @apply text-2xl md:text-3xl font-extrabold tracking-tight text-glow; }
+  .kicker    { @apply text-xs font-bold tracking-[.2em] text-mute; }
+  .lead      { @apply text-mute leading-relaxed; }
+
+  .btn       { @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold tracking-wide transition-colors; }
+  .btn-go    { @apply btn bg-royal text-white hover:bg-[#2f5fd0] disabled:bg-panel disabled:text-mute disabled:cursor-not-allowed; }
+  .btn-ghost { @apply btn border border-line text-ink hover:border-royal; }
+  .btn-link  { @apply text-sm font-semibold text-mute hover:text-white; }
+
+  .pill      { @apply inline-flex items-center rounded-md px-3 py-1.5 text-xs font-extrabold tracking-[.15em] uppercase; }
+  .pill-done { @apply text-mute; }
+  .pill-go   { @apply bg-royal text-white; }
+  .pill-lock { @apply bg-panel text-mute; }
+
+  .field     { @apply block w-full rounded-lg bg-panel border border-line px-4 py-3 text-ink placeholder:text-mute/70 focus:border-royal; }
+  .label     { @apply block text-sm font-semibold text-mute mb-1.5; }
+  .flash     { @apply wrap mt-4 rounded-lg border px-4 py-3 text-sm; }
+  .flash-notice { @apply flash border-royal/50 bg-royalink/30 text-glow; }
+  .flash-alert  { @apply flash border-red-500/50 bg-red-950/40 text-red-200; }
+
+  /* Pathway rail */
+  .rail      { @apply relative pl-10; }
+  .rail::before { content: ""; @apply absolute left-3 top-3 bottom-3 w-px bg-line; }
+  .rail-row  { @apply relative flex items-start gap-4 py-4 border-b border-line last:border-b-0; }
+  .node      { @apply absolute -left-10 top-5 h-6 w-6 rounded-full border-2 border-line bg-night flex items-center justify-center; }
+  .node-done { @apply border-royal bg-royal; }
+  .node-go   { @apply border-royal; }
+  .node-go::after { content: ""; @apply h-2 w-2 rounded-full bg-royal; }
+  .thumb     { @apply h-16 w-28 shrink-0 rounded-md bg-panel border border-line overflow-hidden flex items-center justify-center text-mute; }
+
+  /* Lesson body prose */
+  .prose-ink h3 { @apply text-lg font-extrabold mt-6 mb-2 text-ink; }
+  .prose-ink p  { @apply text-ink/90 leading-relaxed mb-4; }
+  .prose-ink ul { @apply list-disc pl-5 mb-4 space-y-1 text-ink/90; }
+  .prose-ink blockquote { @apply border-l-2 border-royal pl-4 my-4 text-glow italic; }
+
+  /* Likert scale */
+  .likert     { @apply grid grid-cols-5 gap-1.5 mt-3; }
+  .likert label { @apply cursor-pointer rounded-md border border-line bg-panel py-2 text-center text-xs font-semibold text-mute has-[:checked]:bg-royal has-[:checked]:border-royal has-[:checked]:text-white; }
+  .likert input { @apply sr-only; }
+
+  /* Score bars */
+  .bar  { @apply h-2 w-full rounded bg-panel overflow-hidden; }
+  .bar > span { @apply block h-full bg-royal; }
+
+  /* Video frame */
+  .video { @apply relative w-full overflow-hidden rounded-xl bg-black border border-line; aspect-ratio: 16 / 9; }
+  .video iframe { @apply absolute inset-0 h-full w-full; }
+}
