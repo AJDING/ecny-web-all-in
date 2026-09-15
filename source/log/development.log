@@ -1,0 +1,748 @@
+[dotenv] Set [36mRAILS_MAX_THREADS[0m, [36mAPP_HOST[0m, [36mCHURCH_NAME[0m, [36mCHURCH_EMAIL[0m, [36mSCHEDULING_URL[0m, [36mALL_IN_GATHERING_URL[0m, [36mSMTP_ADDRESS[0m, [36mSMTP_PORT[0m, [36mSMTP_USERNAME[0m, [36mSMTP_PASSWORD[0m, [36mMAIL_FROM[0m, [36mR2_ACCOUNT_ID[0m, [36mR2_ACCESS_KEY_ID[0m, [36mR2_SECRET_ACCESS_KEY[0m, [36mR2_BUCKET[0m, [36mPCO_APP_ID[0m, [36mPCO_SECRET[0m, [36mPCO_WORKFLOW_ID[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[35m (271.3ms)[0m  [1m[35mCREATE DATABASE "all_in_development" ENCODING = 'unicode'[0m
+  [1m[35m (119.8ms)[0m  [1m[35mCREATE DATABASE "all_in_test" ENCODING = 'unicode'[0m
+  [1m[35m (19.3ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY)[0m
+  [1m[35m (2.7ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8756711255310219075)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.7ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Create (6.1ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-09-15 20:54:08.085104', '2026-09-15 20:54:08.085107') RETURNING "key"[0m
+Migrating to DeviseCreateUsers (20260912000001)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "users" ("id" bigserial primary key, "email" character varying DEFAULT '' NOT NULL, "encrypted_password" character varying DEFAULT '' NOT NULL, "first_name" character varying NOT NULL, "last_name" character varying NOT NULL, "phone" character varying, "admin" boolean DEFAULT FALSE NOT NULL, "reset_password_token" character varying, "reset_password_sent_at" timestamp(6), "remember_created_at" timestamp(6), "pathway_completed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email" ON "users" ("email")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_reset_password_token" ON "users" ("reset_password_token")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260912000001') RETURNING "version"[0m
+  [1m[36mTRANSACTION (13.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreatePathwayTables (20260912000002)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.9ms)[0m  [1m[35mCREATE TABLE "steps" ("id" bigserial primary key, "position" integer NOT NULL, "slug" character varying NOT NULL, "title" character varying NOT NULL, "description" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_steps_on_slug" ON "steps" ("slug")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_steps_on_position" ON "steps" ("position")[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "lessons" ("id" bigserial primary key, "step_id" bigint NOT NULL, "position" integer NOT NULL, "slug" character varying NOT NULL, "title" character varying NOT NULL, "description" text, "kind" character varying DEFAULT 'video' NOT NULL, "vimeo_id" character varying, "vimeo_hash" character varying, "body" text, "speaker_notes" text, "published" boolean DEFAULT TRUE NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_169d460e9d"
+FOREIGN KEY ("step_id")
+  REFERENCES "steps" ("id")
+)[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE INDEX "index_lessons_on_step_id" ON "lessons" ("step_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_lessons_on_slug" ON "lessons" ("slug")[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_lessons_on_step_id_and_position" ON "lessons" ("step_id", "position")[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "lesson_completions" ("id" bigserial primary key, "user_id" bigint NOT NULL, "lesson_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_182c3d87f7"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+, CONSTRAINT "fk_rails_a283bcc300"
+FOREIGN KEY ("lesson_id")
+  REFERENCES "lessons" ("id")
+)[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_lesson_completions_on_user_id" ON "lesson_completions" ("user_id")[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_lesson_completions_on_lesson_id" ON "lesson_completions" ("lesson_id")[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_lesson_completions_on_user_id_and_lesson_id" ON "lesson_completions" ("user_id", "lesson_id")[0m
+  [1m[35m (13.0ms)[0m  [1m[35mCREATE TABLE "assessments" ("id" bigserial primary key, "step_id" bigint NOT NULL, "position" integer NOT NULL, "slug" character varying NOT NULL, "title" character varying NOT NULL, "description" text, "intro" text, "categories" jsonb DEFAULT '{}' NOT NULL, "top_n" integer DEFAULT 3 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_3206d18955"
+FOREIGN KEY ("step_id")
+  REFERENCES "steps" ("id")
+)[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_assessments_on_step_id" ON "assessments" ("step_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_assessments_on_slug" ON "assessments" ("slug")[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "questions" ("id" bigserial primary key, "assessment_id" bigint NOT NULL, "position" integer NOT NULL, "category" character varying NOT NULL, "text" text NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_ed899323ab"
+FOREIGN KEY ("assessment_id")
+  REFERENCES "assessments" ("id")
+)[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_questions_on_assessment_id" ON "questions" ("assessment_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_questions_on_assessment_id_and_position" ON "questions" ("assessment_id", "position")[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "assessment_results" ("id" bigserial primary key, "user_id" bigint NOT NULL, "assessment_id" bigint NOT NULL, "answers" jsonb DEFAULT '{}' NOT NULL, "scores" jsonb DEFAULT '{}' NOT NULL, "completed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_06dc4a9caa"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+, CONSTRAINT "fk_rails_72c3892886"
+FOREIGN KEY ("assessment_id")
+  REFERENCES "assessments" ("id")
+)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_assessment_results_on_user_id" ON "assessment_results" ("user_id")[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_assessment_results_on_assessment_id" ON "assessment_results" ("assessment_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_assessment_results_on_user_id_and_assessment_id" ON "assessment_results" ("user_id", "assessment_id")[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "appointments" ("id" bigserial primary key, "user_id" bigint NOT NULL, "status" character varying DEFAULT 'unlocked' NOT NULL, "scheduled_at" timestamp(6), "meeting_preference" character varying, "notes" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_9e31213785"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_appointments_on_user_id" ON "appointments" ("user_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260912000002') RETURNING "version"[0m
+  [1m[36mTRANSACTION (27.3ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateActiveStorageTables (20260915205329)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "active_storage_blobs" ("id" bigserial primary key, "key" character varying NOT NULL, "filename" character varying NOT NULL, "content_type" character varying, "metadata" text, "service_name" character varying NOT NULL, "byte_size" bigint NOT NULL, "checksum" character varying, "created_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key")[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" bigserial primary key, "name" character varying NOT NULL, "record_type" character varying NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" bigserial primary key, "blob_id" bigint NOT NULL, "variation_digest" character varying NOT NULL, CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20260915205329') RETURNING "version"[0m
+  [1m[36mTRANSACTION (21.9ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT pg_advisory_unlock(8756711255310219075)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+[dotenv] Set [36mRAILS_MAX_THREADS[0m, [36mAPP_HOST[0m, [36mCHURCH_NAME[0m, [36mCHURCH_EMAIL[0m, [36mSCHEDULING_URL[0m, [36mALL_IN_GATHERING_URL[0m, [36mSMTP_ADDRESS[0m, [36mSMTP_PORT[0m, [36mSMTP_USERNAME[0m, [36mSMTP_PASSWORD[0m, [36mMAIL_FROM[0m, [36mR2_ACCOUNT_ID[0m, [36mR2_ACCESS_KEY_ID[0m, [36mR2_SECRET_ACCESS_KEY[0m, [36mR2_BUCKET[0m, [36mPCO_APP_ID[0m, [36mPCO_SECRET[0m, [36mPCO_WORKFLOW_ID[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mStep Load (0.4ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."slug" = $1 LIMIT $2[0m  [["slug", "learn"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mStep Create (10.6ms)[0m  [1m[32mINSERT INTO "steps" ("position", "slug", "title", "description", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["position", 1], ["slug", "learn"], ["title", "Learn About Encounter"], ["description", "Hear our story, what we believe, and how we do church — through a few short videos and readings."], ["created_at", "2026-09-15 20:54:24.932873"], ["updated_at", "2026-09-15 20:54:24.932873"]]
+  [1m[36mTRANSACTION (6.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mStep Load (0.2ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."slug" = $1 LIMIT $2[0m  [["slug", "assess"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mStep Create (2.1ms)[0m  [1m[32mINSERT INTO "steps" ("position", "slug", "title", "description", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["position", 2], ["slug", "assess"], ["title", "Discover Your Design"], ["description", "Three short assessments that help you discover how you connect with God and how you're built to serve."], ["created_at", "2026-09-15 20:54:24.955637"], ["updated_at", "2026-09-15 20:54:24.955637"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mStep Load (0.3ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."slug" = $1 LIMIT $2[0m  [["slug", "meet"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mStep Create (1.7ms)[0m  [1m[32mINSERT INTO "steps" ("position", "slug", "title", "description", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["position", 3], ["slug", "meet"], ["title", "Your All In Appointment"], ["description", "Meet one-on-one with someone from our team to go over your results, pray together, and find your place at Encounter."], ["created_at", "2026-09-15 20:54:24.964118"], ["updated_at", "2026-09-15 20:54:24.964118"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "welcome"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (2.1ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 1], ["slug", "welcome"], ["title", "Welcome to All In"], ["description", "What All In is and what the next three steps look like."], ["kind", "video"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "All In has three steps: learn about Encounter, discover how you're designed, and meet with our team. You can pause and come back any time — your progress is saved."], ["speaker_notes", "TARGET LENGTH: 2–3 min. Host: a pastor or All In team lead, warm and direct.\n- \"One encounter with Jesus will change your life forever.\" Say it, then own it: that's why this church exists.\n- What All In is: not a class, not a hoop. It's how we make sure nobody stays a stranger.\n- The three steps (show them on screen): Learn · Discover · Meet.\n- What they'll get at the end: a Personal Ministry Plan and a real person who knows their name.\n- Practical: 7 short items, ~30 min of assessments, one appointment. Do it on your phone.\n- Close: \"We're glad you're here. Let's go all in.\"\n"], ["published", true], ["created_at", "2026-09-15 20:54:25.427486"], ["updated_at", "2026-09-15 20:54:25.427486"]]
+  [1m[36mTRANSACTION (23.8ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "our-story"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (1.9ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 2], ["slug", "our-story"], ["title", "Our Story | Pastors Zack & Rachelle Wechsler"], ["description", "How God led Zack and Rachelle from a Las Vegas coffee house to Rochester."], ["kind", "video"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "In 2009, Zack and Rachelle Wechsler planted Encounter Church Las Vegas in a small coffee house. In the spring of 2020 they answered the call to lead what was then New Hope Community Church in North Chili — now Encounter Church New York."], ["speaker_notes", "TARGET LENGTH: 6–9 min. Pastors Zack & Rachelle, conversational, seated (like the Mercy Culture pastor-story videos).\n- 2009: a coffee house in Las Vegas. What was the prompt from God? What did the first year feel like?\n- The people who came: \"prostitutes, pimps, drug dealers, the religious, and prodigals\" — tell one story (with permission).\n- The declaration: \"What happens in Vegas will not stay in Vegas but will shake the nations.\"\n- Spring 2020: the call to Rochester. Leaving after 11 years. What confirmed it?\n- New Hope becomes Encounter Church NY. The 20,000 sq ft addition — not a building story, a \"God makes room\" story.\n- Close with a word to the new person watching: why you're glad they're here.\n"], ["published", true], ["created_at", "2026-09-15 20:54:25.459187"], ["updated_at", "2026-09-15 20:54:25.459187"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.2ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "five-cs"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (1.8ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 3], ["slug", "five-cs"], ["title", "The Five C's of All In"], ["description", "What it means to belong here, and how you can be part of it."], ["kind", "video"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "## The Five C's\n\n- **Christ** — one encounter with Jesus changes everything. Belonging starts with Him, not with us.\n- **Community** — you were never meant to do this alone. Encounter Groups are where Sunday becomes family.\n- **Culture** — presence, authentic community, identity in Christ, and love for our world. It's how we act when we're at our best.\n- **Commitment** — members attend, serve, and give. Not because we need you to, but because that's what family does.\n- **Commission** — we equip and send. You are a supernatural minister of the gospel, and your world is waiting.\n\n> Draft for pastoral review. Edit the five words and their one-liners in Admin → Lessons until they sound like Encounter.\n"], ["speaker_notes", "TARGET LENGTH: 5–7 min. Teaching pastor. Whiteboard or on-screen text for each C.\n- Frame: \"Membership isn't a database status. It's a family posture.\" Then the five C's, one at a time.\n- Christ / Community / Culture / Commitment / Commission — for each: what it is, what it looks like on a Tuesday, one scripture.\n- Commitment is the honest one: say plainly that members attend, serve, and tithe, and why that's freedom not pressure.\n- Close: \"Step Two is where we help you see how God built you — take it honestly.\"\n"], ["published", true], ["created_at", "2026-09-15 20:54:25.466932"], ["updated_at", "2026-09-15 20:54:25.466932"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.2ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "we-believe"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (3.9ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 4], ["slug", "we-believe"], ["title", "What We Believe"], ["description", "Our foundational beliefs and the historic faith we stand in."], ["kind", "text"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "## The historic Christian faith\n\nAlong with the historic Christian faith, we affirm the Apostles' Creed: one God, Father, Son, and Holy Spirit; Jesus Christ, born of the Virgin Mary, crucified, risen, ascended, and coming again; the forgiveness of sins, the resurrection of the body, and life everlasting.\n\n## What shapes us\n\n- The Bible is the inspired, authoritative Word of God.\n- Salvation is by grace through faith in Jesus alone, and it frees us from the power of the devil — sin, lies, sickness, and torment.\n- The Holy Spirit is active today. Every believer is a supernatural minister of the gospel of power whom signs and wonders should follow.\n- We embrace the biblical church government of apostles, prophets, evangelists, pastors, and teachers.\n- Christ is returning for a glorious, overcoming bride — His Church. We are more than \"sinners saved by grace\"; we are saints, sons and daughters of the King.\n\n## Want to go deeper?\n\nOur We Believe page on encounterny.com includes a pastoral paper on speaking in tongues and more. Bring any questions to your All In appointment — nothing is off the table.\n"], ["speaker_notes", nil], ["published", true], ["created_at", "2026-09-15 20:54:25.477451"], ["updated_at", "2026-09-15 20:54:25.477451"]]
+  [1m[36mTRANSACTION (6.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "vision-and-culture"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (4.3ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 5], ["slug", "vision-and-culture"], ["title", "Our Vision & Culture"], ["description", "Personal, regional, and global expansion of God's kingdom through His manifest presence."], ["kind", "video"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "## Our vision\n\nTo see personal, regional, and global expansion of God's kingdom through His manifest presence.\n\n## Our four core values\n\n- Encounter God's manifest presence\n- Encounter authentic Christian community\n- Encounter your identity in Christ\n- Encounter your world with the love of God\n\nOur first ministry is to God, so we worship with extravagant joy and gratitude. All ministry flows from the prayer, \"Thy kingdom come, on earth as it is in heaven.\" We pastor a city, not just a church.\n"], ["speaker_notes", "TARGET LENGTH: 5–7 min. Pastor Zack (or a pastor on staff). Pull the strongest 60 seconds from a recent Sunday message on presence/revival and let it set the tone.\n- The vision sentence, slowly, twice. Explain each phrase: personal → regional → global; \"manifest presence.\"\n- Four core values as four encounters: presence, community, identity, world. One story for each.\n- \"Our first ministry is to God\" — why worship is loud and long here, and why that's not for show.\n- \"We pastor a city, not just a church\" — what that means for how a member lives Monday–Saturday.\n"], ["published", true], ["created_at", "2026-09-15 20:54:25.500280"], ["updated_at", "2026-09-15 20:54:25.500280"]]
+  [1m[36mTRANSACTION (19.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "healthy-transitions"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (1.7ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 6], ["slug", "healthy-transitions"], ["title", "Healthy Transitions"], ["description", "Joining well: our heart for how people come to Encounter and how they're sent from it."], ["kind", "video"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "If you're coming from another church, we want you to come well — with honor, without secrets, and blessed by the leaders who cared for you before us."], ["speaker_notes", "TARGET LENGTH: 4–6 min. A pastor with a gentle touch. This one prevents years of relational mess.\n- Why we ask: most people arrive from somewhere, and how you leave shapes how you'll land.\n- If you're leaving a healthy church: have the conversation, say thank you, don't take people with you.\n- If you're leaving a painful situation: you're safe here; we'll walk with you toward forgiveness, not gossip.\n- If you're already committed elsewhere: stay planted, serve and give there, and keep enjoying us online.\n- How we send people out (missions, church plants, moves): with blessing. Same standard in both directions.\n"], ["published", true], ["created_at", "2026-09-15 20:54:25.536767"], ["updated_at", "2026-09-15 20:54:25.536767"]]
+  [1m[36mTRANSACTION (7.9ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.1ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "welcome-to-encounter"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (1.9ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 7], ["slug", "welcome-to-encounter"], ["title", "Welcome to Encounter Church NY"], ["description", "As a member we ask you to attend, serve, and give. Here's where you can plug in."], ["kind", "text"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "## Attend\n\nSundays at 9am and 11am, 3355 Union St, North Chili. Pre-service prayer happens before each service — you're welcome to join. Can't make it in person? Watch the Sunday stream.\n\n## Serve\n\nOur Serve Team makes Sunday happen: hospitality and café, Encounter Kids, Encounter YTH, worship, media and live stream, prayer, parking and safety, and more. Your Step Two results will point you toward a fit, and your All In appointment is where you'll sign up.\n\n## Grow\n\nEncounter Groups meet across the region — that's where you'll find your people. Grow Nights are our midweek gatherings for teaching and equipping.\n\n## Give\n\nWe honor God with the first of what we have. Members give consistently through pushpay.com/g/encounterchurchnynorthchili or in person on Sunday.\n\n## Stay connected\n\nSubscribe to Encounter Church NY on YouTube, follow us on social, and use the Connect form on encounterny.com any time you have a need or a question.\n"], ["speaker_notes", nil], ["published", true], ["created_at", "2026-09-15 20:54:25.551501"], ["updated_at", "2026-09-15 20:54:25.551501"]]
+  [1m[36mTRANSACTION (1.7ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Load (0.2ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "before-step-two"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mLesson Create (1.7ms)[0m  [1m[32mINSERT INTO "lessons" ("step_id", "position", "slug", "title", "description", "kind", "vimeo_id", "vimeo_hash", "body", "speaker_notes", "published", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING "id"[0m  [["step_id", 1], ["position", 8], ["slug", "before-step-two"], ["title", "Before You Begin Step Two"], ["description", "A word about the assessments and how we'll use your results."], ["kind", "text"], ["vimeo_id", nil], ["vimeo_hash", nil], ["body", "You're about to take three short assessments:\n\n- **Connection with God** — the ways you most naturally meet with Him (27 questions).\n- **Spiritual Gifts** — how the Holy Spirit has equipped you to serve (48 questions).\n- **Personal Design** — your wiring, and how you work best with others (16 questions).\n\nAnswer for who you actually are today, not who you think a mature Christian should be. There are no wrong answers and no scores to beat. Your results become your Personal Ministry Plan, which we'll walk through together at your All In appointment.\n\n> \"We are saints — sons and daughters of the King.\"\n"], ["speaker_notes", nil], ["published", true], ["created_at", "2026-09-15 20:54:25.560383"], ["updated_at", "2026-09-15 20:54:25.560383"]]
+  [1m[36mTRANSACTION (1.7ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mAssessment Load (0.3ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."slug" = $1 LIMIT $2[0m  [["slug", "connection-with-god"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mAssessment Create (2.2ms)[0m  [1m[32mINSERT INTO "assessments" ("step_id", "position", "slug", "title", "description", "intro", "categories", "top_n", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING "id"[0m  [["step_id", 2], ["position", 1], ["slug", "connection-with-god"], ["title", "Connection with God"], ["description", "Discover the ways you most naturally connect with God."], ["intro", "There is one way to God — through Jesus — but in Jesus there are many ways to connect with Him. This shows you yours, so your daily encounters can be personal, not borrowed."], ["categories", "{\"Worship\":{\"summary\":\"You meet God most in adoration — singing, lifting your hands, lingering in a worship set long after the band has stopped. Presence is your language.\",\"serve\":[\"Worship team\",\"Pre-service prayer\",\"Sunday atmosphere\"]},\"The Word\":{\"summary\":\"Scripture is where God speaks to you clearly. Reading, memorizing, and sitting with a passage brings you alive.\",\"serve\":[\"Encounter Group leader\",\"Grow Nights\",\"Encounter Kids teaching\"]},\"Prayer \\u0026 Intercession\":{\"summary\":\"You connect with God by talking with Him — and by standing in the gap for others. Prayer isn't a task for you; it's home.\",\"serve\":[\"Prayer team\",\"Pre-service prayer\",\"Altar ministry\"]},\"Solitude \\u0026 Stillness\":{\"summary\":\"You hear God best when everything else is quiet. Silence, sabbath, and unhurried time restore you.\",\"serve\":[\"Prayer chapel\",\"Care \\u0026 follow-up\",\"Behind-the-scenes serving\"]},\"Creation\":{\"summary\":\"God feels near to you outdoors — a trail, a sunrise, the lake. His world preaches to you.\",\"serve\":[\"Outreach \\u0026 events\",\"Facilities \\u0026 grounds\",\"Men's/women's outdoor gatherings\"]},\"Serving\":{\"summary\":\"You encounter God while doing something for someone — setting up chairs, cooking, driving. Serving is your worship.\",\"serve\":[\"Hospitality \\u0026 café\",\"Setup \\u0026 tear-down\",\"Parking \\u0026 safety\"]},\"Creative Expression\":{\"summary\":\"Making things — art, music, writing, design, video — is where you and God create together.\",\"serve\":[\"Media \\u0026 live stream\",\"Creative \\u0026 design\",\"Worship team\"]},\"Community \\u0026 Conversation\":{\"summary\":\"You meet God around a table. Honest conversation, shared meals, and being known draw you closer to Him.\",\"serve\":[\"Encounter Groups\",\"Connect \\u0026 hospitality\",\"All In team\"]},\"Justice \\u0026 Compassion\":{\"summary\":\"You feel God's heart most when you're with the overlooked — the poor, the sick, the stranger. Mercy moves you.\",\"serve\":[\"Outreach\",\"Benevolence \\u0026 care\",\"Missions\"]}}"], ["top_n", 3], ["created_at", "2026-09-15 20:54:25.632961"], ["updated_at", "2026-09-15 20:54:25.632961"]]
+  [1m[36mTRANSACTION (13.9ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 1], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 1], ["category", "Worship"], ["text", "I lose track of time during worship."], ["created_at", "2026-09-15 20:54:25.842614"], ["updated_at", "2026-09-15 20:54:25.842614"]]
+  [1m[36mTRANSACTION (21.6ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 2], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 2], ["category", "Worship"], ["text", "Singing to God is the quickest way for me to feel close to Him."], ["created_at", "2026-09-15 20:54:25.871812"], ["updated_at", "2026-09-15 20:54:25.871812"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 3], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 3], ["category", "Worship"], ["text", "A great worship set stays with me for days."], ["created_at", "2026-09-15 20:54:25.878952"], ["updated_at", "2026-09-15 20:54:25.878952"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 4], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.2ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 4], ["category", "The Word"], ["text", "I feel most connected to God after reading the Bible."], ["created_at", "2026-09-15 20:54:25.886311"], ["updated_at", "2026-09-15 20:54:25.886311"]]
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 5], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 5], ["category", "The Word"], ["text", "I underline, memorize, or write out scriptures."], ["created_at", "2026-09-15 20:54:25.893107"], ["updated_at", "2026-09-15 20:54:25.893107"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 6], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 6], ["category", "The Word"], ["text", "A single verse can change my whole day."], ["created_at", "2026-09-15 20:54:25.899862"], ["updated_at", "2026-09-15 20:54:25.899862"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 7], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 7], ["category", "Prayer & Intercession"], ["text", "Talking with God feels as natural as talking with a friend."], ["created_at", "2026-09-15 20:54:25.907148"], ["updated_at", "2026-09-15 20:54:25.907148"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 8], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 8], ["category", "Prayer & Intercession"], ["text", "I find myself praying for people I've just met."], ["created_at", "2026-09-15 20:54:25.918316"], ["updated_at", "2026-09-15 20:54:25.918316"]]
+  [1m[36mTRANSACTION (12.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 9], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 9], ["category", "Prayer & Intercession"], ["text", "I'd rather pray about a problem than talk about it."], ["created_at", "2026-09-15 20:54:25.937381"], ["updated_at", "2026-09-15 20:54:25.937381"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 10], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 10], ["category", "Solitude & Stillness"], ["text", "I need quiet to hear God clearly."], ["created_at", "2026-09-15 20:54:25.944674"], ["updated_at", "2026-09-15 20:54:25.944674"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 11], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 11], ["category", "Solitude & Stillness"], ["text", "I feel God's presence most when I'm alone and unhurried."], ["created_at", "2026-09-15 20:54:25.951960"], ["updated_at", "2026-09-15 20:54:25.951960"]]
+  [1m[36mTRANSACTION (1.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 12], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 12], ["category", "Solitude & Stillness"], ["text", "Too much noise and activity drains my spiritual life."], ["created_at", "2026-09-15 20:54:25.959443"], ["updated_at", "2026-09-15 20:54:25.959443"]]
+  [1m[36mTRANSACTION (1.8ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 13], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.2ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 13], ["category", "Creation"], ["text", "Being outdoors makes me want to worship."], ["created_at", "2026-09-15 20:54:25.966948"], ["updated_at", "2026-09-15 20:54:25.966948"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 14], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 14], ["category", "Creation"], ["text", "I sense God more on a walk than in a building."], ["created_at", "2026-09-15 20:54:25.974594"], ["updated_at", "2026-09-15 20:54:25.974594"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 15], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 15], ["category", "Creation"], ["text", "Sunsets, storms, and stars remind me how big God is."], ["created_at", "2026-09-15 20:54:25.982125"], ["updated_at", "2026-09-15 20:54:25.982125"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 16], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 16], ["category", "Serving"], ["text", "I feel closest to God when I'm helping someone."], ["created_at", "2026-09-15 20:54:25.988990"], ["updated_at", "2026-09-15 20:54:25.988990"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 17], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 17], ["category", "Serving"], ["text", "Practical work for the church feels like worship to me."], ["created_at", "2026-09-15 20:54:25.996413"], ["updated_at", "2026-09-15 20:54:25.996413"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 18], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 18], ["category", "Serving"], ["text", "I'd rather show love by doing than by saying."], ["created_at", "2026-09-15 20:54:26.003397"], ["updated_at", "2026-09-15 20:54:26.003397"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 19], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 19], ["category", "Creative Expression"], ["text", "I connect with God through making things — art, music, writing, or design."], ["created_at", "2026-09-15 20:54:26.010532"], ["updated_at", "2026-09-15 20:54:26.010532"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 20], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 20], ["category", "Creative Expression"], ["text", "Creativity feels like a conversation with God."], ["created_at", "2026-09-15 20:54:26.017758"], ["updated_at", "2026-09-15 20:54:26.017758"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 21], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 21], ["category", "Creative Expression"], ["text", "I process what God is saying by creating something."], ["created_at", "2026-09-15 20:54:26.026973"], ["updated_at", "2026-09-15 20:54:26.026973"]]
+  [1m[36mTRANSACTION (5.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 22], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 22], ["category", "Community & Conversation"], ["text", "I hear God most in honest conversation with other believers."], ["created_at", "2026-09-15 20:54:26.039054"], ["updated_at", "2026-09-15 20:54:26.039054"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 23], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 23], ["category", "Community & Conversation"], ["text", "A meal with friends can feel as spiritual as a church service."], ["created_at", "2026-09-15 20:54:26.046486"], ["updated_at", "2026-09-15 20:54:26.046486"]]
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 24], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 24], ["category", "Community & Conversation"], ["text", "I grow faster with people than on my own."], ["created_at", "2026-09-15 20:54:26.053250"], ["updated_at", "2026-09-15 20:54:26.053250"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 25], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 25], ["category", "Justice & Compassion"], ["text", "I feel God's heart most when I'm with people who are hurting."], ["created_at", "2026-09-15 20:54:26.060922"], ["updated_at", "2026-09-15 20:54:26.060922"]]
+  [1m[36mTRANSACTION (6.6ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 26], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 26], ["category", "Justice & Compassion"], ["text", "Injustice makes me want to act, not just pray."], ["created_at", "2026-09-15 20:54:26.074117"], ["updated_at", "2026-09-15 20:54:26.074117"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 1], ["position", 27], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 1], ["position", 27], ["category", "Justice & Compassion"], ["text", "I sense God's presence in hospitals, shelters, and hard places."], ["created_at", "2026-09-15 20:54:26.081854"], ["updated_at", "2026-09-15 20:54:26.081854"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND (position > $2) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], [nil, 27]]
+  [1m[36mAssessment Load (0.1ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."slug" = $1 LIMIT $2[0m  [["slug", "spiritual-gifts"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mAssessment Create (2.2ms)[0m  [1m[32mINSERT INTO "assessments" ("step_id", "position", "slug", "title", "description", "intro", "categories", "top_n", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING "id"[0m  [["step_id", 2], ["position", 2], ["slug", "spiritual-gifts"], ["title", "Spiritual Gifts"], ["description", "How the Holy Spirit has equipped you to build up the Church."], ["intro", "Every believer is a supernatural minister of the gospel. These questions surface the gifts already at work in you — rate how true each statement is, not how much you'd like it to be true."], ["categories", "{\"Administration\":{\"summary\":\"You bring order to chaos — plans, systems, timelines. Vision needs you to become reality.\",\"serve\":[\"Serve Team coordination\",\"Events\",\"Office \\u0026 admin\"]},\"Apostleship\":{\"summary\":\"You pioneer. Starting things, breaking new ground, and sending others energizes you.\",\"serve\":[\"Church planting \\u0026 missions\",\"New ministry launches\",\"Encounter Movement\"]},\"Discernment\":{\"summary\":\"You sense what's really going on — in people, rooms, and situations — and what's from God.\",\"serve\":[\"Prayer team\",\"Altar ministry\",\"Leadership support\"]},\"Evangelism\":{\"summary\":\"You share Jesus naturally, and people respond. You can't stay quiet about Him.\",\"serve\":[\"Outreach\",\"Connect team\",\"Sunday greeting\"]},\"Exhortation\":{\"summary\":\"You call people up. Encouragement, coaching, and timely challenge flow out of you.\",\"serve\":[\"Encounter Group leader\",\"All In team\",\"Mentoring\"]},\"Faith\":{\"summary\":\"You believe God for the impossible and hold steady when others waver.\",\"serve\":[\"Prayer team\",\"Building \\u0026 vision initiatives\",\"Testimony\"]},\"Giving\":{\"summary\":\"You give generously and joyfully, and you spot needs before they're announced.\",\"serve\":[\"Benevolence\",\"Missions support\",\"Stewardship\"]},\"Healing\":{\"summary\":\"You expect God to heal, and you're willing to pray for it — in church and out.\",\"serve\":[\"Altar ministry\",\"Prayer team\",\"Hospital \\u0026 home visits\"]},\"Helps\":{\"summary\":\"You see the practical need and meet it without being asked. Nothing is beneath you.\",\"serve\":[\"Setup \\u0026 tear-down\",\"Parking \\u0026 safety\",\"Facilities\"]},\"Hospitality\":{\"summary\":\"You make people feel at home — welcomed, fed, and seen.\",\"serve\":[\"Café \\u0026 hospitality\",\"Greeters\",\"Encounter Groups host\"]},\"Intercession\":{\"summary\":\"You carry people and situations in prayer for long stretches, and you see answers.\",\"serve\":[\"Pre-service prayer\",\"Prayer chapel\",\"Intercession team\"]},\"Leadership\":{\"summary\":\"People follow you. You cast vision, make decisions, and take responsibility.\",\"serve\":[\"Team lead\",\"Encounter Group leader\",\"Ministry leadership\"]},\"Mercy\":{\"summary\":\"You feel what others feel and move toward the hurting with tenderness.\",\"serve\":[\"Care \\u0026 follow-up\",\"Benevolence\",\"Hospital visits\"]},\"Prophecy\":{\"summary\":\"God gives you words, pictures, and impressions for people and the church — and you share them with love.\",\"serve\":[\"Prophetic team\",\"Altar ministry\",\"Prayer team\"]},\"Shepherding\":{\"summary\":\"You nurture people over time — protecting, feeding, and walking with them.\",\"serve\":[\"Encounter Group leader\",\"Encounter Kids / YTH\",\"Care team\"]},\"Teaching\":{\"summary\":\"You make truth clear. Explaining scripture so people understand and change is your joy.\",\"serve\":[\"Grow Nights\",\"Encounter Kids / YTH teaching\",\"Encounter Group teaching\"]}}"], ["top_n", 3], ["created_at", "2026-09-15 20:54:26.090242"], ["updated_at", "2026-09-15 20:54:26.090242"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 1], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 1], ["category", "Administration"], ["text", "I enjoy organizing people, tasks, and details so a goal actually gets reached."], ["created_at", "2026-09-15 20:54:26.099119"], ["updated_at", "2026-09-15 20:54:26.099119"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 2], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 2], ["category", "Administration"], ["text", "I naturally create plans, schedules, and checklists."], ["created_at", "2026-09-15 20:54:26.106417"], ["updated_at", "2026-09-15 20:54:26.106417"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 3], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 3], ["category", "Administration"], ["text", "Others rely on me to keep things running smoothly."], ["created_at", "2026-09-15 20:54:26.112896"], ["updated_at", "2026-09-15 20:54:26.112896"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 4], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 4], ["category", "Apostleship"], ["text", "I love starting new things from scratch."], ["created_at", "2026-09-15 20:54:26.119709"], ["updated_at", "2026-09-15 20:54:26.119709"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 5], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (3.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 5], ["category", "Apostleship"], ["text", "I'm drawn to places and people the church hasn't reached yet."], ["created_at", "2026-09-15 20:54:26.127137"], ["updated_at", "2026-09-15 20:54:26.127137"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 6], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 6], ["category", "Apostleship"], ["text", "I'd rather pioneer than maintain."], ["created_at", "2026-09-15 20:54:26.136607"], ["updated_at", "2026-09-15 20:54:26.136607"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 7], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 7], ["category", "Discernment"], ["text", "I can usually tell when something is off before anyone says so."], ["created_at", "2026-09-15 20:54:26.143989"], ["updated_at", "2026-09-15 20:54:26.143989"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 8], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 8], ["category", "Discernment"], ["text", "I sense whether a teaching or idea is truly from God."], ["created_at", "2026-09-15 20:54:26.151720"], ["updated_at", "2026-09-15 20:54:26.151720"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 9], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 9], ["category", "Discernment"], ["text", "People ask me for my read on situations."], ["created_at", "2026-09-15 20:54:26.159392"], ["updated_at", "2026-09-15 20:54:26.159392"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 10], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 10], ["category", "Evangelism"], ["text", "I look for openings to talk about Jesus with people who don't know Him."], ["created_at", "2026-09-15 20:54:26.166627"], ["updated_at", "2026-09-15 20:54:26.166627"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 11], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 11], ["category", "Evangelism"], ["text", "Sharing my faith feels natural, not forced."], ["created_at", "2026-09-15 20:54:26.173634"], ["updated_at", "2026-09-15 20:54:26.173634"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 12], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 12], ["category", "Evangelism"], ["text", "I've seen people come to Christ through conversations with me."], ["created_at", "2026-09-15 20:54:26.182214"], ["updated_at", "2026-09-15 20:54:26.182214"]]
+  [1m[36mTRANSACTION (1.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 13], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 13], ["category", "Exhortation"], ["text", "I love encouraging people toward their next step."], ["created_at", "2026-09-15 20:54:26.191138"], ["updated_at", "2026-09-15 20:54:26.191138"]]
+  [1m[36mTRANSACTION (1.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 14], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 14], ["category", "Exhortation"], ["text", "People leave conversations with me feeling motivated."], ["created_at", "2026-09-15 20:54:26.200488"], ["updated_at", "2026-09-15 20:54:26.200488"]]
+  [1m[36mTRANSACTION (3.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 15], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 15], ["category", "Exhortation"], ["text", "I'm comfortable challenging a friend in love when they need it."], ["created_at", "2026-09-15 20:54:26.212001"], ["updated_at", "2026-09-15 20:54:26.212001"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 16], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 16], ["category", "Faith"], ["text", "I believe God for things others consider impossible."], ["created_at", "2026-09-15 20:54:26.220132"], ["updated_at", "2026-09-15 20:54:26.220132"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 17], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 17], ["category", "Faith"], ["text", "I stay confident in God's promises during hard seasons."], ["created_at", "2026-09-15 20:54:26.227915"], ["updated_at", "2026-09-15 20:54:26.227915"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 18], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (3.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 18], ["category", "Faith"], ["text", "My faith often strengthens the people around me."], ["created_at", "2026-09-15 20:54:26.235108"], ["updated_at", "2026-09-15 20:54:26.235108"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 19], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 19], ["category", "Giving"], ["text", "I give generously, often beyond what's expected."], ["created_at", "2026-09-15 20:54:26.244521"], ["updated_at", "2026-09-15 20:54:26.244521"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 20], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 20], ["category", "Giving"], ["text", "I get real joy from meeting a financial need."], ["created_at", "2026-09-15 20:54:26.252254"], ["updated_at", "2026-09-15 20:54:26.252254"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 21], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 21], ["category", "Giving"], ["text", "I manage money well so I can give more."], ["created_at", "2026-09-15 20:54:26.260851"], ["updated_at", "2026-09-15 20:54:26.260851"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 22], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 22], ["category", "Healing"], ["text", "I regularly pray for the sick and expect God to heal."], ["created_at", "2026-09-15 20:54:26.268670"], ["updated_at", "2026-09-15 20:54:26.268670"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 23], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 23], ["category", "Healing"], ["text", "I've seen God heal someone after prayer."], ["created_at", "2026-09-15 20:54:26.276157"], ["updated_at", "2026-09-15 20:54:26.276157"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 24], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 24], ["category", "Healing"], ["text", "I feel compassion and boldness when I meet someone who is sick."], ["created_at", "2026-09-15 20:54:26.283750"], ["updated_at", "2026-09-15 20:54:26.283750"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 25], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 25], ["category", "Helps"], ["text", "I notice practical needs and quietly meet them."], ["created_at", "2026-09-15 20:54:26.291926"], ["updated_at", "2026-09-15 20:54:26.291926"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 26], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 26], ["category", "Helps"], ["text", "I'm happy doing behind-the-scenes work that no one sees."], ["created_at", "2026-09-15 20:54:26.299243"], ["updated_at", "2026-09-15 20:54:26.299243"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 27], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 27], ["category", "Helps"], ["text", "Supporting a leader so they can do their job well fulfills me."], ["created_at", "2026-09-15 20:54:26.307317"], ["updated_at", "2026-09-15 20:54:26.307317"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 28], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 28], ["category", "Hospitality"], ["text", "I love hosting people in my home."], ["created_at", "2026-09-15 20:54:26.314406"], ["updated_at", "2026-09-15 20:54:26.314406"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 29], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 29], ["category", "Hospitality"], ["text", "I go out of my way to make newcomers feel welcome."], ["created_at", "2026-09-15 20:54:26.321385"], ["updated_at", "2026-09-15 20:54:26.321385"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 30], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 30], ["category", "Hospitality"], ["text", "Food, a warm room, and good conversation are my ministry."], ["created_at", "2026-09-15 20:54:26.329193"], ["updated_at", "2026-09-15 20:54:26.329193"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 31], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (3.2ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 31], ["category", "Intercession"], ["text", "I can pray for a long time without losing focus."], ["created_at", "2026-09-15 20:54:26.336654"], ["updated_at", "2026-09-15 20:54:26.336654"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 32], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 32], ["category", "Intercession"], ["text", "I feel a burden to pray for specific people and situations."], ["created_at", "2026-09-15 20:54:26.345331"], ["updated_at", "2026-09-15 20:54:26.345331"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 33], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 33], ["category", "Intercession"], ["text", "I've seen answers to prayers I've carried for months."], ["created_at", "2026-09-15 20:54:26.353699"], ["updated_at", "2026-09-15 20:54:26.353699"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 34], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 34], ["category", "Leadership"], ["text", "People naturally look to me for direction."], ["created_at", "2026-09-15 20:54:26.361015"], ["updated_at", "2026-09-15 20:54:26.361015"]]
+  [1m[36mTRANSACTION (3.0ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 35], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 35], ["category", "Leadership"], ["text", "I'm comfortable making decisions and owning the outcome."], ["created_at", "2026-09-15 20:54:26.372335"], ["updated_at", "2026-09-15 20:54:26.372335"]]
+  [1m[36mTRANSACTION (2.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.4ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 36], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 36], ["category", "Leadership"], ["text", "I can see where a team needs to go and get them there."], ["created_at", "2026-09-15 20:54:26.381795"], ["updated_at", "2026-09-15 20:54:26.381795"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 37], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 37], ["category", "Mercy"], ["text", "I'm drawn to people who are hurting or overlooked."], ["created_at", "2026-09-15 20:54:26.389544"], ["updated_at", "2026-09-15 20:54:26.389544"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 38], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 38], ["category", "Mercy"], ["text", "I feel others' pain deeply and want to relieve it."], ["created_at", "2026-09-15 20:54:26.396905"], ["updated_at", "2026-09-15 20:54:26.396905"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 39], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 39], ["category", "Mercy"], ["text", "I'm patient with people who are struggling."], ["created_at", "2026-09-15 20:54:26.405301"], ["updated_at", "2026-09-15 20:54:26.405301"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 40], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 40], ["category", "Prophecy"], ["text", "God often gives me a word, picture, or impression for someone."], ["created_at", "2026-09-15 20:54:26.412515"], ["updated_at", "2026-09-15 20:54:26.412515"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 41], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 41], ["category", "Prophecy"], ["text", "When I share what I sense from God, it lands with people."], ["created_at", "2026-09-15 20:54:26.420198"], ["updated_at", "2026-09-15 20:54:26.420198"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 42], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 42], ["category", "Prophecy"], ["text", "I feel responsible to speak truth from God even when it's uncomfortable."], ["created_at", "2026-09-15 20:54:26.427765"], ["updated_at", "2026-09-15 20:54:26.427765"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 43], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 43], ["category", "Shepherding"], ["text", "I enjoy walking with the same people over a long time."], ["created_at", "2026-09-15 20:54:26.434488"], ["updated_at", "2026-09-15 20:54:26.434488"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 44], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 44], ["category", "Shepherding"], ["text", "I feel protective of the people God has put in my care."], ["created_at", "2026-09-15 20:54:26.443841"], ["updated_at", "2026-09-15 20:54:26.443841"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 45], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 45], ["category", "Shepherding"], ["text", "I'd rather go deep with a few than wide with many."], ["created_at", "2026-09-15 20:54:26.452272"], ["updated_at", "2026-09-15 20:54:26.452272"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 46], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.9ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 46], ["category", "Teaching"], ["text", "I enjoy studying scripture so I can explain it to others."], ["created_at", "2026-09-15 20:54:26.460716"], ["updated_at", "2026-09-15 20:54:26.460716"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 47], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 47], ["category", "Teaching"], ["text", "People tell me they understand things better after I explain them."], ["created_at", "2026-09-15 20:54:26.468760"], ["updated_at", "2026-09-15 20:54:26.468760"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 2], ["position", 48], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 2], ["position", 48], ["category", "Teaching"], ["text", "I pay attention to how a truth is communicated, not just what it is."], ["created_at", "2026-09-15 20:54:26.476404"], ["updated_at", "2026-09-15 20:54:26.476404"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND (position > $2) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 2], [nil, 48]]
+  [1m[36mAssessment Load (0.2ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."slug" = $1 LIMIT $2[0m  [["slug", "personal-design"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mAssessment Create (1.8ms)[0m  [1m[32mINSERT INTO "assessments" ("step_id", "position", "slug", "title", "description", "intro", "categories", "top_n", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING "id"[0m  [["step_id", 2], ["position", 3], ["slug", "personal-design"], ["title", "Personal Design"], ["description", "How you're wired, and how you work best with others."], ["intro", "God made you on purpose. These 16 questions describe your natural pace, focus, and way of relating — so we can place you where you'll thrive."], ["categories", "{\"Pioneer\":{\"summary\":\"Fast, direct, results-driven. You take charge, make decisions quickly, and push through obstacles. You're at your best with a clear goal and room to move.\",\"serve\":[\"Team lead\",\"Launching new initiatives\",\"Outreach\"]},\"Connector\":{\"summary\":\"Warm, energetic, people-first. You light up a room, build relationships instantly, and make others feel included. You're at your best out front with people.\",\"serve\":[\"Greeters \\u0026 Connect team\",\"Hospitality\",\"Encounter Groups\"]},\"Anchor\":{\"summary\":\"Steady, loyal, calm. You serve consistently, keep the peace, and stay when things get hard. You're at your best on a stable team with clear expectations.\",\"serve\":[\"Encounter Kids\",\"Care \\u0026 follow-up\",\"Setup \\u0026 tear-down\"]},\"Architect\":{\"summary\":\"Careful, precise, thoughtful. You value accuracy, plan ahead, and get details right. You're at your best with time to think and quality to protect.\",\"serve\":[\"Media \\u0026 live stream\",\"Finance \\u0026 admin\",\"Systems \\u0026 planning\"]}}"], ["top_n", 2], ["created_at", "2026-09-15 20:54:26.484819"], ["updated_at", "2026-09-15 20:54:26.484819"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 1], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 1], ["category", "Pioneer"], ["text", "I make decisions quickly and act on them."], ["created_at", "2026-09-15 20:54:26.493127"], ["updated_at", "2026-09-15 20:54:26.493127"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 2], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 2], ["category", "Pioneer"], ["text", "I'd rather lead than follow."], ["created_at", "2026-09-15 20:54:26.499765"], ["updated_at", "2026-09-15 20:54:26.499765"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 3], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.3ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 3], ["category", "Pioneer"], ["text", "I get impatient with slow processes."], ["created_at", "2026-09-15 20:54:26.507909"], ["updated_at", "2026-09-15 20:54:26.507909"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 4], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 4], ["category", "Pioneer"], ["text", "Challenges energize me more than they worry me."], ["created_at", "2026-09-15 20:54:26.514703"], ["updated_at", "2026-09-15 20:54:26.514703"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 5], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 5], ["category", "Connector"], ["text", "I'm energized by being around lots of people."], ["created_at", "2026-09-15 20:54:26.521542"], ["updated_at", "2026-09-15 20:54:26.521542"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 6], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 6], ["category", "Connector"], ["text", "I make friends easily and quickly."], ["created_at", "2026-09-15 20:54:26.528615"], ["updated_at", "2026-09-15 20:54:26.528615"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 7], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 7], ["category", "Connector"], ["text", "I'm optimistic and expressive."], ["created_at", "2026-09-15 20:54:26.534841"], ["updated_at", "2026-09-15 20:54:26.534841"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 8], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 8], ["category", "Connector"], ["text", "I'd rather talk something through than think it through alone."], ["created_at", "2026-09-15 20:54:26.543304"], ["updated_at", "2026-09-15 20:54:26.543304"]]
+  [1m[36mTRANSACTION (1.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 9], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.2ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 9], ["category", "Anchor"], ["text", "I'm loyal and stick with people and commitments."], ["created_at", "2026-09-15 20:54:26.551290"], ["updated_at", "2026-09-15 20:54:26.551290"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 10], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.6ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 10], ["category", "Anchor"], ["text", "I prefer stable routines over constant change."], ["created_at", "2026-09-15 20:54:26.559200"], ["updated_at", "2026-09-15 20:54:26.559200"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 11], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 11], ["category", "Anchor"], ["text", "I'm a calm presence when others are stressed."], ["created_at", "2026-09-15 20:54:26.566087"], ["updated_at", "2026-09-15 20:54:26.566087"]]
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 12], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.5ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 12], ["category", "Anchor"], ["text", "I'd rather support a team than be the face of it."], ["created_at", "2026-09-15 20:54:26.574228"], ["updated_at", "2026-09-15 20:54:26.574228"]]
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 13], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.7ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 13], ["category", "Architect"], ["text", "I like to have all the facts before I decide."], ["created_at", "2026-09-15 20:54:26.581971"], ["updated_at", "2026-09-15 20:54:26.581971"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 14], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (2.1ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 14], ["category", "Architect"], ["text", "I notice details other people miss."], ["created_at", "2026-09-15 20:54:26.589435"], ["updated_at", "2026-09-15 20:54:26.589435"]]
+  [1m[36mTRANSACTION (1.4ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.1ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 15], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.8ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 15], ["category", "Architect"], ["text", "I follow through carefully and finish what I start."], ["created_at", "2026-09-15 20:54:26.597403"], ["updated_at", "2026-09-15 20:54:26.597403"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND "questions"."position" = $2 ORDER BY "questions"."position" ASC LIMIT $3[0m  [["assessment_id", 3], ["position", 16], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mQuestion Create (1.4ms)[0m  [1m[32mINSERT INTO "questions" ("assessment_id", "position", "category", "text", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["assessment_id", 3], ["position", 16], ["category", "Architect"], ["text", "I prefer working from a clear plan or standard."], ["created_at", "2026-09-15 20:54:26.605476"], ["updated_at", "2026-09-15 20:54:26.605476"]]
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mQuestion Load (0.2ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" = $1 AND (position > $2) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 3], [nil, 16]]
+  [1m[36mUser Load (0.5ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mUser Exists? (1.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.5ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "first_name", "last_name", "phone", "admin", "reset_password_token", "reset_password_sent_at", "remember_created_at", "pathway_completed_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["first_name", "All In"], ["last_name", "Admin"], ["phone", "[FILTERED]"], ["admin", true], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["pathway_completed_at", nil], ["created_at", "2026-09-15 20:54:26.943691"], ["updated_at", "2026-09-15 20:54:26.943691"]]
+  [1m[36mTRANSACTION (49.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mLesson Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "lessons"[0m
+  [1m[36mQuestion Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "questions"[0m
+  [1m[36mUser Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "users"[0m
+[dotenv] Loaded [33m.env[0m
+[dotenv] Loaded [33m.env[0m
+Started GET "/" for ::1 at 2026-09-15 16:56:14 -0400
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by DashboardController#show as HTML
+Completed 401 Unauthorized in 920ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2026-09-15 16:56:18 -0400
+Processing by Devise::SessionsController#new as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 373.2ms | GC: 0.0ms)
+  Rendered shared/_nav.html.erb (Duration: 9.1ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 5.7ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 557.6ms | GC: 0.0ms)
+Completed 200 OK in 2072ms (Views: 927.3ms | ActiveRecord: 5.0ms (0 queries, 0 cached) | GC: 0.7ms)
+
+
+Started GET "/favicon.ico" for ::1 at 2026-09-15 16:56:25 -0400
+  
+ActionController::RoutingError (No route matches [GET] "/favicon.ico"):
+  
+Started POST "/users/sign_in" for ::1 at 2026-09-15 16:57:29 -0400
+Processing by Devise::SessionsController#create as TURBO_STREAM
+  Parameters: {"authenticity_token"=>"[FILTERED]", "user"=>{"email"=>"[FILTERED]", "password"=>"[FILTERED]", "remember_me"=>"0"}, "commit"=>"Sign in"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+Redirected to http://localhost:3000/
+Completed 303 See Other in 1231ms (ActiveRecord: 0.5ms (1 query, 0 cached) | GC: 1.2ms)
+
+
+Started GET "/" for ::1 at 2026-09-15 16:57:31 -0400
+Processing by DashboardController#show as TURBO_STREAM
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mStep Load (0.3ms)[0m  [1m[34mSELECT "steps".* FROM "steps" ORDER BY "steps"."position" ASC[0m
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."step_id" IN ($1, $2, $3) ORDER BY "lessons"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mAssessment Load (0.6ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."step_id" IN ($1, $2, $3) ORDER BY "assessments"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mActiveStorage::Attachment Load (0.3ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_type" = $1 AND "active_storage_attachments"."name" = $2 AND "active_storage_attachments"."record_id" IN ($3, $4, $5, $6, $7, $8, $9, $10)[0m  [["record_type", "Lesson"], ["name", "thumbnail"], ["record_id", 1], ["record_id", 2], ["record_id", 3], ["record_id", 4], ["record_id", 5], ["record_id", 6], ["record_id", 7], ["record_id", 8]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mQuestion Load (0.5ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" IN ($1, $2, $3) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], ["assessment_id", 2], ["assessment_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLessonCompletion Pluck (0.2ms)[0m  [1m[34mSELECT "lesson_completions"."lesson_id" FROM "lesson_completions" WHERE "lesson_completions"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:16:in `completed_lesson_ids'
+  Rendering layout layouts/application.html.erb
+  Rendering dashboard/show.html.erb within layouts/application
+  Rendered shared/_lesson_thumb.html.erb (Duration: 7.7ms | GC: 0.0ms)
+  Rendered dashboard/show.html.erb within layouts/application (Duration: 25.4ms | GC: 0.0ms)
+  Rendered shared/_nav.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 29.2ms | GC: 0.0ms)
+Completed 200 OK in 1764ms (Views: 35.9ms | ActiveRecord: 10.8ms (7 queries, 0 cached) | GC: 7.9ms)
+
+
+Started GET "/lessons/welcome" for ::1 at 2026-09-15 16:57:38 -0400
+Processing by LessonsController#show as HTML
+  Parameters: {"id"=>"welcome"}
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."published" = $1 AND "lessons"."slug" = $2 LIMIT $3[0m  [["published", true], ["slug", "welcome"], ["LIMIT", 1]]
+  ↳ app/controllers/lessons_controller.rb:27:in `set_lesson'
+  [1m[36mStep Load (0.4ms)[0m  [1m[34mSELECT "steps".* FROM "steps" ORDER BY "steps"."position" ASC[0m
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLesson Load (0.4ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."step_id" IN ($1, $2, $3) ORDER BY "lessons"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mAssessment Load (0.4ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."step_id" IN ($1, $2, $3) ORDER BY "assessments"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mActiveStorage::Attachment Load (0.3ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_type" = $1 AND "active_storage_attachments"."name" = $2 AND "active_storage_attachments"."record_id" IN ($3, $4, $5, $6, $7, $8, $9, $10)[0m  [["record_type", "Lesson"], ["name", "thumbnail"], ["record_id", 1], ["record_id", 2], ["record_id", 3], ["record_id", 4], ["record_id", 5], ["record_id", 6], ["record_id", 7], ["record_id", 8]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mQuestion Load (0.5ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" IN ($1, $2, $3) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], ["assessment_id", 2], ["assessment_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLessonCompletion Pluck (0.3ms)[0m  [1m[34mSELECT "lesson_completions"."lesson_id" FROM "lesson_completions" WHERE "lesson_completions"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:16:in `completed_lesson_ids'
+  Rendering layout layouts/application.html.erb
+  Rendering lessons/show.html.erb within layouts/application
+  [1m[36mStep Load (0.2ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."id" = $1 LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  ↳ app/views/lessons/show.html.erb:4
+  Rendered lessons/show.html.erb within layouts/application (Duration: 14.3ms | GC: 0.6ms)
+  Rendered shared/_nav.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 18.4ms | GC: 0.6ms)
+Completed 200 OK in 988ms (Views: 22.2ms | ActiveRecord: 2.9ms (9 queries, 0 cached) | GC: 0.9ms)
+
+
+Started GET "/lessons/welcome" for ::1 at 2026-09-15 16:58:13 -0400
+Processing by LessonsController#show as HTML
+  Parameters: {"id"=>"welcome"}
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."published" = $1 AND "lessons"."slug" = $2 LIMIT $3[0m  [["published", true], ["slug", "welcome"], ["LIMIT", 1]]
+  ↳ app/controllers/lessons_controller.rb:27:in `set_lesson'
+  [1m[36mStep Load (0.3ms)[0m  [1m[34mSELECT "steps".* FROM "steps" ORDER BY "steps"."position" ASC[0m
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."step_id" IN ($1, $2, $3) ORDER BY "lessons"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mAssessment Load (0.3ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."step_id" IN ($1, $2, $3) ORDER BY "assessments"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mActiveStorage::Attachment Load (0.6ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_type" = $1 AND "active_storage_attachments"."name" = $2 AND "active_storage_attachments"."record_id" IN ($3, $4, $5, $6, $7, $8, $9, $10)[0m  [["record_type", "Lesson"], ["name", "thumbnail"], ["record_id", 1], ["record_id", 2], ["record_id", 3], ["record_id", 4], ["record_id", 5], ["record_id", 6], ["record_id", 7], ["record_id", 8]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mQuestion Load (0.3ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" IN ($1, $2, $3) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], ["assessment_id", 2], ["assessment_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLessonCompletion Pluck (0.5ms)[0m  [1m[34mSELECT "lesson_completions"."lesson_id" FROM "lesson_completions" WHERE "lesson_completions"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:16:in `completed_lesson_ids'
+  Rendering layout layouts/application.html.erb
+  Rendering lessons/show.html.erb within layouts/application
+  [1m[36mStep Load (0.4ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."id" = $1 LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  ↳ app/views/lessons/show.html.erb:4
+  Rendered lessons/show.html.erb within layouts/application (Duration: 3.8ms | GC: 0.0ms)
+  Rendered shared/_nav.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.6ms | GC: 0.0ms)
+Completed 200 OK in 923ms (Views: 7.9ms | ActiveRecord: 3.2ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/lessons/welcome" for ::1 at 2026-09-15 17:23:36 -0400
+Processing by LessonsController#show as HTML
+  Parameters: {"id"=>"welcome"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mLesson Load (0.4ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."published" = $1 AND "lessons"."slug" = $2 LIMIT $3[0m  [["published", true], ["slug", "welcome"], ["LIMIT", 1]]
+  ↳ app/controllers/lessons_controller.rb:27:in `set_lesson'
+  [1m[36mStep Load (0.5ms)[0m  [1m[34mSELECT "steps".* FROM "steps" ORDER BY "steps"."position" ASC[0m
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLesson Load (0.4ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."step_id" IN ($1, $2, $3) ORDER BY "lessons"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mAssessment Load (1.1ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."step_id" IN ($1, $2, $3) ORDER BY "assessments"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mActiveStorage::Attachment Load (0.4ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_type" = $1 AND "active_storage_attachments"."name" = $2 AND "active_storage_attachments"."record_id" IN ($3, $4, $5, $6, $7, $8, $9, $10)[0m  [["record_type", "Lesson"], ["name", "thumbnail"], ["record_id", 1], ["record_id", 2], ["record_id", 3], ["record_id", 4], ["record_id", 5], ["record_id", 6], ["record_id", 7], ["record_id", 8]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mQuestion Load (0.7ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" IN ($1, $2, $3) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], ["assessment_id", 2], ["assessment_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLessonCompletion Pluck (0.3ms)[0m  [1m[34mSELECT "lesson_completions"."lesson_id" FROM "lesson_completions" WHERE "lesson_completions"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:16:in `completed_lesson_ids'
+  Rendering layout layouts/application.html.erb
+  Rendering lessons/show.html.erb within layouts/application
+  [1m[36mStep Load (0.3ms)[0m  [1m[34mSELECT "steps".* FROM "steps" WHERE "steps"."id" = $1 LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  ↳ app/views/lessons/show.html.erb:4
+  Rendered lessons/show.html.erb within layouts/application (Duration: 4.6ms | GC: 0.0ms)
+  Rendered shared/_nav.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 8.5ms | GC: 0.0ms)
+Completed 200 OK in 875ms (Views: 9.3ms | ActiveRecord: 16.7ms (9 queries, 0 cached) | GC: 1.2ms)
+
+
+Started GET "/my_progress" for ::1 at 2026-09-15 17:23:41 -0400
+Processing by ProgressController#show as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering progress/show.html.erb within layouts/application
+  [1m[36mStep Load (0.5ms)[0m  [1m[34mSELECT "steps".* FROM "steps" ORDER BY "steps"."position" ASC[0m
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLesson Load (0.4ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."step_id" IN ($1, $2, $3) ORDER BY "lessons"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mAssessment Load (0.3ms)[0m  [1m[34mSELECT "assessments".* FROM "assessments" WHERE "assessments"."step_id" IN ($1, $2, $3) ORDER BY "assessments"."position" ASC[0m  [["step_id", 1], ["step_id", 2], ["step_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mActiveStorage::Attachment Load (0.4ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_type" = $1 AND "active_storage_attachments"."name" = $2 AND "active_storage_attachments"."record_id" IN ($3, $4, $5, $6, $7, $8, $9, $10)[0m  [["record_type", "Lesson"], ["name", "thumbnail"], ["record_id", 1], ["record_id", 2], ["record_id", 3], ["record_id", 4], ["record_id", 5], ["record_id", 6], ["record_id", 7], ["record_id", 8]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mQuestion Load (0.5ms)[0m  [1m[34mSELECT "questions".* FROM "questions" WHERE "questions"."assessment_id" IN ($1, $2, $3) ORDER BY "questions"."position" ASC[0m  [["assessment_id", 1], ["assessment_id", 2], ["assessment_id", 3]]
+  ↳ app/services/pathway.rb:20:in `steps'
+  [1m[36mLessonCompletion Pluck (0.4ms)[0m  [1m[34mSELECT "lesson_completions"."lesson_id" FROM "lesson_completions" WHERE "lesson_completions"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:16:in `completed_lesson_ids'
+  [1m[36mAssessmentResult Load (4.7ms)[0m  [1m[34mSELECT "assessment_results".* FROM "assessment_results" WHERE "assessment_results"."user_id" = $1[0m  [["user_id", 1]]
+  ↳ app/models/user.rb:19:in `result_for'
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered shared/_lesson_thumb.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered progress/show.html.erb within layouts/application (Duration: 92.8ms | GC: 4.9ms)
+  Rendered shared/_nav.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered shared/_footer.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 96.9ms | GC: 4.9ms)
+Completed 200 OK in 1107ms (Views: 91.9ms | ActiveRecord: 10.5ms (8 queries, 0 cached) | GC: 4.9ms)
+
+
+Started GET "/admin" for ::1 at 2026-09-15 17:23:44 -0400
+Processing by Admin::DashboardController#index as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mUser Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "users"[0m
+  ↳ app/controllers/admin/dashboard_controller.rb:3:in `index'
+  [1m[36mUser Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "users" WHERE "users"."pathway_completed_at" IS NOT NULL[0m
+  ↳ app/controllers/admin/dashboard_controller.rb:4:in `index'
+  [1m[36mAppointment Count (9.6ms)[0m  [1m[34mSELECT COUNT(*) FROM "appointments" WHERE "appointments"."status" = $1[0m  [["status", "scheduled"]]
+  ↳ app/controllers/admin/dashboard_controller.rb:5:in `index'
+  Rendering layout layouts/admin.html.erb
+  Rendering admin/dashboard/index.html.erb within layouts/admin
+  [1m[36mLesson Load (1.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" ORDER BY "lessons"."position" ASC[0m
+  ↳ app/views/admin/dashboard/index.html.erb:11
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" ORDER BY "users"."created_at" DESC LIMIT $1[0m  [["LIMIT", 10]]
+  ↳ app/views/admin/dashboard/index.html.erb:23
+  Rendered admin/dashboard/index.html.erb within layouts/admin (Duration: 20.4ms | GC: 4.7ms)
+  Rendered layout layouts/admin.html.erb (Duration: 30.9ms | GC: 6.2ms)
+Completed 200 OK in 1022ms (Views: 41.6ms | ActiveRecord: 13.0ms (6 queries, 0 cached) | GC: 6.5ms)
+
+
+Started GET "/admin/lessons/welcome/edit" for ::1 at 2026-09-15 17:23:50 -0400
+Processing by Admin::LessonsController#edit as HTML
+  Parameters: {"id"=>"welcome"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mLesson Load (0.4ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "welcome"], ["LIMIT", 1]]
+  ↳ app/controllers/admin/lessons_controller.rb:7:in `edit'
+  Rendering layout layouts/admin.html.erb
+  Rendering admin/lessons/edit.html.erb within layouts/admin
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = $1 AND "active_storage_attachments"."record_type" = $2 AND "active_storage_attachments"."name" = $3 LIMIT $4[0m  [["record_id", 1], ["record_type", "Lesson"], ["name", "thumbnail"], ["LIMIT", 1]]
+  ↳ app/views/admin/lessons/edit.html.erb:16
+  Rendered admin/lessons/edit.html.erb within layouts/admin (Duration: 223.4ms | GC: 9.5ms)
+  Rendered layout layouts/admin.html.erb (Duration: 225.5ms | GC: 9.5ms)
+Completed 200 OK in 1265ms (Views: 228.4ms | ActiveRecord: 0.9ms (3 queries, 0 cached) | GC: 20.4ms)
+
+
+Started GET "/admin/lessons/our-story/edit" for ::1 at 2026-09-15 17:23:53 -0400
+Processing by Admin::LessonsController#edit as HTML
+  Parameters: {"id"=>"our-story"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 ORDER BY "users"."id" ASC LIMIT $2[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[36mLesson Load (0.3ms)[0m  [1m[34mSELECT "lessons".* FROM "lessons" WHERE "lessons"."slug" = $1 LIMIT $2[0m  [["slug", "our-story"], ["LIMIT", 1]]
+  ↳ app/controllers/admin/lessons_controller.rb:7:in `edit'
+  Rendering layout layouts/admin.html.erb
+  Rendering admin/lessons/edit.html.erb within layouts/admin
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = $1 AND "active_storage_attachments"."record_type" = $2 AND "active_storage_attachments"."name" = $3 LIMIT $4[0m  [["record_id", 2], ["record_type", "Lesson"], ["name", "thumbnail"], ["LIMIT", 1]]
+  ↳ app/views/admin/lessons/edit.html.erb:16
+  Rendered admin/lessons/edit.html.erb within layouts/admin (Duration: 4.8ms | GC: 0.0ms)
+  Rendered layout layouts/admin.html.erb (Duration: 6.7ms | GC: 0.0ms)
+Completed 200 OK in 915ms (Views: 7.2ms | ActiveRecord: 0.8ms (3 queries, 0 cached) | GC: 0.4ms)
+
+
