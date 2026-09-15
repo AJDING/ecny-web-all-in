@@ -1,0 +1,21 @@
+<p><%= link_to "← Assessments", admin_assessments_path, class: "btn-link" %></p>
+<h1 class="text-2xl font-extrabold mt-2"><%= @assessment.title %></h1>
+<p class="text-mute mt-1"><%= @assessment.intro %></p>
+
+<h2 class="text-lg font-extrabold mt-8">Questions</h2>
+<ol class="mt-3 space-y-2 text-sm">
+  <% @questions.each do |q| %>
+    <li class="flex gap-3"><span class="text-mute w-6 shrink-0"><%= q.position %>.</span><span class="flex-1"><%= q.text %></span><span class="text-mute shrink-0"><%= q.category %></span></li>
+  <% end %>
+</ol>
+
+<h2 class="text-lg font-extrabold mt-10">Category write-ups</h2>
+<div class="mt-3 grid gap-4 md:grid-cols-2">
+  <% @assessment.categories.each do |name, info| %>
+    <div class="card p-4">
+      <h3 class="font-bold"><%= name %></h3>
+      <p class="text-sm text-ink/90 mt-2"><%= info["summary"] %></p>
+      <p class="text-xs text-mute mt-2">Serve: <%= Array(info["serve"]).join(", ") %></p>
+    </div>
+  <% end %>
+</div>

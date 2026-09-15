@@ -18,6 +18,7 @@ class AppointmentsController < ApplicationController
   private
 
   def require_unlocked
+    return if current_user.admin?
     return if pathway.meet_unlocked?
     redirect_to my_progress_path, alert: "Complete all three assessments to unlock your appointment."
   end

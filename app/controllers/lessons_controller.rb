@@ -28,6 +28,7 @@ class LessonsController < ApplicationController
   end
 
   def require_unlocked
+    return if current_user.admin?
     return if pathway.lesson_unlocked?(@lesson)
     redirect_to my_progress_path, alert: "Finish the previous lessons to unlock this one."
   end

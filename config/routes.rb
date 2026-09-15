@@ -24,5 +24,6 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :show]
     resources :lessons, only: [:index, :edit, :update]
     resources :appointments, only: [:index, :update]
+    resources :assessments, only: [:index, :show]
   end
 end

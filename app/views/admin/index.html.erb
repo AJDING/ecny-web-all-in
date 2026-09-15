@@ -1,0 +1,13 @@
+<h1 class="text-2xl font-extrabold">Assessments</h1>
+<p class="text-mute text-sm mt-1">Questions and category write-ups are edited in <code>db/seeds.rb</code>, then <code>bin/rails db:seed</code>. Use Preview to take one as a person would.</p>
+<div class="mt-6 space-y-3">
+  <% @assessments.each do |a| %>
+    <div class="card p-5 flex items-center justify-between gap-4">
+      <div>
+        <h2 class="font-extrabold"><%= link_to a.title, admin_assessment_path(a) %></h2>
+        <p class="text-sm text-mute"><%= a.question_count %> questions · <%= a.categories.size %> categories · shows top <%= a.top_n %></p>
+      </div>
+      <%= link_to "Preview", assessment_path(a), class: "btn-ghost" %>
+    </div>
+  <% end %>
+</div>
