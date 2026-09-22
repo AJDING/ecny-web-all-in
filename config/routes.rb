@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboard#index"
     resources :users, only: [:index, :show]
+    get "insights", to: "insights#index"
     resources :lessons, only: [:index, :edit, :update]
     resources :assessments, only: [:index, :show]
     resources :appointments, only: [:index, :update]

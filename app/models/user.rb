@@ -1,5 +1,9 @@
 class User < ApplicationRecord
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+  # :confirmable is used ONLY for email changes (reconfirmable): new sign-ups are auto-confirmed
+  # below so nobody is blocked from starting All In, but changing your email requires clicking a
+  # link sent to the new address before it takes effect.
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :confirmable
+  before_create :skip_confirmation!
 
   has_many :lesson_completions, dependent: :destroy
   has_many :completed_lessons, through: :lesson_completions, source: :lesson

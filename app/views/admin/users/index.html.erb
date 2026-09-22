@@ -1,5 +1,6 @@
 <div class="flex items-center justify-between gap-4">
-  <h1 class="text-2xl font-extrabold">People</h1>
+  <h1 class="text-2xl font-extrabold">People <span class="text-mute text-base font-normal">(<%= @total %>)</span></h1>
+  <%= link_to "Export CSV", admin_users_path(format: :csv), class: "btn-ghost !py-1.5" %>
   <%= form_with url: admin_users_path, method: :get, class: "flex gap-2" do |f| %>
     <%= f.text_field :q, value: params[:q], placeholder: "Search name or email", class: "field !py-2 w-64" %>
     <%= f.submit "Search", class: "btn-ghost" %>
@@ -19,3 +20,11 @@
     <% end %>
   </tbody>
 </table>
+<% pages = (@total.to_f / @per).ceil %>
+<% if pages > 1 %>
+  <div class="mt-6 flex items-center gap-3 text-sm">
+    <%= link_to "← Previous", admin_users_path(q: params[:q], page: @page - 1), class: "btn-link" if @page > 1 %>
+    <span class="text-mute">Page <%= @page %> of <%= pages %></span>
+    <%= link_to "Next →", admin_users_path(q: params[:q], page: @page + 1), class: "btn-link" if @page < pages %>
+  </div>
+<% end %>

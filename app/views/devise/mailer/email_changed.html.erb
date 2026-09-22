@@ -1,0 +1,7 @@
+<p>Hi <%= @resource.first_name %>,</p>
+<% if @resource.try(:unconfirmed_email?) %>
+  <p>A request was made to change the email on your All In account to <strong><%= @resource.unconfirmed_email %></strong>.</p>
+<% else %>
+  <p>The email on your All In account has been changed to <strong><%= @resource.email %></strong>.</p>
+<% end %>
+<p>If this wasn't you, reply to this email or contact <%= AllIn::SETTINGS[:church_email] %> right away.</p>

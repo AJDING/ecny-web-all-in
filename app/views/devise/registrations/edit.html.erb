@@ -7,7 +7,14 @@
       <div><%= f.label :first_name, class: "label" %><%= f.text_field :first_name, class: "field" %></div>
       <div><%= f.label :last_name, class: "label" %><%= f.text_field :last_name, class: "field" %></div>
     </div>
-    <div><%= f.label :email, class: "label" %><%= f.email_field :email, class: "field" %></div>
+    <div>
+      <%= f.label :email, class: "label" %><%= f.email_field :email, class: "field" %>
+      <% if resource.pending_reconfirmation? %>
+        <p class="text-xs text-glow mt-1">Pending: <%= resource.unconfirmed_email %> — check that inbox for the confirmation link. Your current email stays active until then.</p>
+      <% else %>
+        <p class="text-xs text-mute mt-1">Changing your email sends a confirmation link to the new address; enter your current password below to change it.</p>
+      <% end %>
+    </div>
     <div><%= f.label :phone, "Mobile phone", class: "label" %><%= f.telephone_field :phone, class: "field" %></div>
     <hr class="border-line">
     <p class="text-sm text-mute">Leave the password fields blank unless you want to change it.</p>

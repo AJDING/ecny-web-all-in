@@ -11,5 +11,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
-  def after_update_path_for(_resource) = edit_user_registration_path
+  def after_update_path_for(resource)
+    if resource.pending_reconfirmation?
+      flash[:notice] = "Check #{resource.unconfirmed_email} for a confirmation link. Your email stays #{resource.email} until you click it."
+    end
+    edit_user_registration_path
+  end
 end

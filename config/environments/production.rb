@@ -13,6 +13,8 @@ Rails.application.configure do
   config.log_tags = [:request_id]
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.action_mailer.perform_caching = false
+  # Don't 500 a page if SMTP isn't configured yet; failures are logged instead.
+  config.action_mailer.raise_delivery_errors = false
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "allin.encounterny.com"), protocol: "https" }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {

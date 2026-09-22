@@ -1,0 +1,38 @@
+<h1 class="text-2xl font-extrabold">Insights</h1>
+<p class="text-mute text-sm mt-1">Everyone who has registered, and how the whole pool scores across every category.</p>
+
+<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <% [["Registered", @people_total], ["Finished Step One", @step_one_done], ["Finished all assessments", @all_three_done], ["RSVP'd / attended", @rsvps]].each do |label, n| %>
+    <div class="card p-5"><p class="text-sm text-mute"><%= label %></p><p class="text-3xl font-extrabold mt-1"><%= n %></p></div>
+  <% end %>
+</div>
+
+<% @assessments.each do |a| %>
+  <% rows = @category_stats[a.id]; n = (@results_by_assmt[a.id] || []).size %>
+  <section class="card mt-8 p-6">
+    <div class="flex items-baseline justify-between gap-4">
+      <h2 class="text-lg font-extrabold"><%= a.title %></h2>
+      <span class="text-sm text-mute"><%= n %> completed</span>
+    </div>
+    <% if n.zero? %>
+      <p class="text-mute text-sm mt-3">No one has completed this yet.</p>
+    <% else %>
+      <table class="mt-4 w-full text-sm">
+        <thead class="text-mute text-left">
+          <tr><th class="py-2 w-1/4">Category</th><th class="w-2/5">Average score (all people)</th><th class="text-right">In someone's top <%= a.top_n %></th><th class="text-right">Want to learn more</th></tr>
+        </thead>
+        <tbody>
+          <% rows.each do |cat, avg, _cnt, tops, learn| %>
+            <tr class="border-t border-line">
+              <td class="py-2 font-semibold"><%= cat %></td>
+              <td><div class="flex items-center gap-3"><div class="bar flex-1"><span style="width:<%= avg %>%"></span></div><span class="w-10 text-right text-glow"><%= avg %>%</span></div></td>
+              <td class="text-right"><%= tops %> <span class="text-mute">(<%= (tops * 100.0 / n).round %>%)</span></td>
+              <td class="text-right"><%= learn %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p class="text-xs text-mute mt-3">Highest average = where the pool is strongest; "want to learn more" = demand for a future class.</p>
+    <% end %>
+  </section>
+<% end %>

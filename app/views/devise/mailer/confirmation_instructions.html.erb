@@ -1,0 +1,8 @@
+<p>Hi <%= @resource.first_name %>,</p>
+<% if @resource.pending_reconfirmation? %>
+  <p>You asked to change your All In email to <strong><%= @resource.unconfirmed_email %></strong>. Click below to confirm the change. If you didn't request this, ignore this email and your address won't change.</p>
+<% else %>
+  <p>Confirm your All In email address by clicking the link below.</p>
+<% end %>
+<p><%= link_to "Confirm my email", confirmation_url(@resource, confirmation_token: @token) %></p>
+<p style="color:#666;font-size:12px">This link expires in 3 days. Encounter Church · All In</p>
