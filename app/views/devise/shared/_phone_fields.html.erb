@@ -2,7 +2,7 @@
 <div>
   <%= f.label :phone_number, "Mobile phone (optional)", class: "label" %>
   <div class="flex gap-2">
-    <%= f.select :phone_country, CountryCodes.options, {}, class: "field !w-44 shrink-0", aria: { label: "Country code" } %>
+    <%= f.select :phone_country, CountryCodes.options, {}, class: "field !w-32 shrink-0 font-mono", aria: { label: "Country code" } %>
     <%= f.telephone_field :phone_number, class: "field flex-1", placeholder: "585 555 0123", autocomplete: "tel-national", inputmode: "tel" %>
   </div>
   <p class="text-xs text-mute mt-1">Saved as <%= f.object.phone_display || "+1 …" %> for texts and calls from the team.</p>

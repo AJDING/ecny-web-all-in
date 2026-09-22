@@ -44,9 +44,10 @@ module CountryCodes
     ["Vatican City", "VA", "39"], ["Venezuela", "VE", "58"], ["Vietnam", "VN", "84"], ["Yemen", "YE", "967"], ["Zambia", "ZM", "260"], ["Zimbabwe", "ZW", "263"]
   ].freeze
 
-  # Options for a <select>: label "🇺🇸 United States (+1)", value "US"
+  # Options for a <select>: label "US +1", value "US". Full country name is in the title attribute.
+  # (No flag emoji: Windows renders them as plain letters.)
   def self.options
-    LIST.map { |name, iso, code| ["#{flag(iso)} #{name} (+#{code.split('-').first})", iso] }
+    LIST.map { |name, iso, code| ["#{iso} +#{code.split('-').first}", iso, { title: name }] }
   end
 
   def self.dial(iso) = LIST.find { |_, i, _| i == iso }&.last&.split("-")&.first
