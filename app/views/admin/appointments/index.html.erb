@@ -1,11 +1,11 @@
-<h1 class="text-2xl font-extrabold">Appointments</h1>
-<p class="text-mute text-sm mt-1">Everyone who has unlocked Step Three. Update status after you meet.</p>
+<h1 class="text-2xl font-extrabold">Gathering RSVPs</h1>
+<p class="text-mute text-sm mt-1">Everyone who has unlocked Step Three. Status: unlocked = hasn't RSVP'd · scheduled = RSVP'd · completed = attended the gathering.</p>
 <div class="mt-6 space-y-3">
   <% @appointments.each do |a| %>
     <%= form_with model: [:admin, a], class: "card p-4 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_1fr_2fr_auto] md:items-end" do |f| %>
       <div><%= link_to a.user.full_name, admin_user_path(a.user), class: "font-bold" %><br><span class="text-mute text-sm"><%= a.user.email %></span><br><span class="text-mute text-xs"><%= a.meeting_preference %></span></div>
       <div><%= f.label :status, class: "label" %><%= f.select :status, Appointment::STATUSES, {}, class: "field !py-2" %></div>
-      <div class="md:col-span-2"><%= f.label :scheduled_at, "When", class: "label" %><%= f.datetime_field :scheduled_at, class: "field !py-2" %></div>
+      <div class="md:col-span-2"><%= f.label :scheduled_at, "Gathering date", class: "label" %><%= f.datetime_field :scheduled_at, class: "field !py-2" %></div>
       <div><%= f.label :notes, class: "label" %><%= f.text_field :notes, class: "field !py-2" %></div>
       <div><%= f.submit "Save", class: "btn-ghost !py-2" %></div>
     <% end %>

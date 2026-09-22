@@ -12,7 +12,7 @@ class AppointmentsController < ApplicationController
                          scheduled_at: params[:scheduled_at].presence)
     current_user.update!(pathway_completed_at: Time.current) if current_user.pathway_completed_at.nil?
     PlanningCenterHandoffJob.perform_later(current_user.id) if ENV["PCO_APP_ID"].present?
-    redirect_to root_path, notice: "You're all in. See you at your appointment."
+    redirect_to root_path, notice: "You're all in. See you at the gathering."
   end
 
   private
@@ -20,6 +20,6 @@ class AppointmentsController < ApplicationController
   def require_unlocked
     return if current_user.admin?
     return if pathway.meet_unlocked?
-    redirect_to my_progress_path, alert: "Complete all three assessments to unlock your appointment."
+    redirect_to my_progress_path, alert: "Complete all three assessments to unlock the gathering RSVP."
   end
 end

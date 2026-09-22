@@ -90,9 +90,9 @@ class Pathway
       { step: assess_step, progress: "#{assessments_done}/#{assessments.size} complete", cta: "Continue",
         assessment: current, thumb: lessons.first }
     elsif !complete?
-      { step: meet_step, progress: "Ready to schedule", cta: "Schedule", appointment: true, thumb: lessons.first }
+      { step: meet_step, progress: "Ready to RSVP", cta: "RSVP", appointment: true, thumb: lessons.last }
     else
-      { step: meet_step, progress: "You're all in", cta: "View my plan", done: true, thumb: lessons.first }
+      { step: meet_step, progress: "You're all in", cta: "View my profile", done: true, thumb: lessons.last }
     end
   end
 

@@ -12,18 +12,19 @@
 | 6 All In experience | Step Three: 1:1 appointment (replica of Connect) + link to the monthly All In gathering (`ALL_IN_GATHERING_URL`) |
 | 7 Test + Launch | README Part 8 checklist |
 
-## Step One lineup (mirrors Mercy Culture's Step One, re-written for Encounter)
+## Step One lineup (five videos, as uploaded to Vimeo Sep 2026)
 
-| # | Lesson | Type | Needs | Source material |
+| # | Lesson | Vimeo ID / hash | Speaker | Length |
 |---|---|---|---|---|
-| 1 | Welcome to All In | video | **Video A** | — |
-| 2 | Our Story · Pastors Zack & Rachelle | video | **Video B** | encounterny.com/about-us/lead-pastors, /encounter-movement-network |
-| 3 | The Five C's of All In | video | record | Draft C's in seeds — pastors to finalize |
-| 4 | What We Believe | text | done | encounterny.com/about-us/we-believe (Apostles' Creed + distinctives) |
-| 5 | Our Vision & Culture | video | record | encounterny.com/about-us/vision-values (vision sentence + 4 core values) |
-| 6 | Healthy Transitions | video | record | Pastoral |
-| 7 | Welcome to Encounter Church NY | text | done | Sundays 9 & 11, Serve Team, Encounter Groups, Grow Nights, Kids, YTH, Give |
-| 8 | Before You Begin Step Two | text | done | — |
+| 1 | Welcome to All In | 1227203543 / 493c66b86f | Silvana | 2:31 |
+| 2 | Our Story · Pastors Zack & Rachelle | 1227128030 / 349cc61341 | Zack & Rachelle | 5:56 |
+| 3 | The Five C's of Membership | 1227203541 / e05f0d4d05 | Pastor Rachelle | 7:17 |
+| 4 | Healthy Transitions | 1227203542 / f8a57caa7f | Amanda | 6:51 |
+| 5 | Your Next Step: The All In Gathering | 1227128029 / 6d9903f330 | Mikey & David | 3:00 |
+
+Summaries under each video in `db/seeds.rb` were written from Vimeo's AI transcripts. Note: the auto-captions spell the pastors' name "Wexler"; the site uses "Wechsler" — fix the caption in Vimeo → video → Languages → English if you want the on-screen subtitles to match.
+
+The Five C's as taught in video 3: **Culture · Core Values · Community · Covenant · Cultivation**. Step Three is the monthly **All In Sunday Gathering** (videos 1 and 5 both tell people to finish all five, then RSVP).
 
 ## Pulling from the sermon archive (youtube.com/@EncounterChurchNY)
 

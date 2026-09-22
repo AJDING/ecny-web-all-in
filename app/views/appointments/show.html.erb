@@ -1,4 +1,4 @@
-<% page_title "Personal Appointment" %>
+<% page_title "All In Sunday Gathering" %>
 <div class="wrap">
   <p class="kicker text-center">STEP THREE</p>
   <h1 class="h-step text-center mt-1"><%= pathway.meet_step.title %></h1>
@@ -6,39 +6,38 @@
 
   <div class="card mt-8 p-6 md:p-8">
     <% if @appointment.scheduled? %>
-      <h2 class="text-xl font-extrabold">You're on the calendar</h2>
+      <h2 class="text-xl font-extrabold">You're on the list</h2>
       <p class="text-mute mt-2">
-        <% if @appointment.scheduled_at %>Scheduled for <%= l @appointment.scheduled_at, format: :long %>.<% else %>Your appointment is booked.<% end %>
-        <% if @appointment.meeting_preference.present? %> Format: <%= @appointment.meeting_preference %>.<% end %>
+        <% if @appointment.scheduled_at %>You RSVP'd for the gathering on <%= l @appointment.scheduled_at, format: :long %>.<% else %>Your RSVP is in. We'll see you at the next All In Sunday Gathering.<% end %>
       </p>
-      <p class="mt-4 text-sm text-mute">Need to change it? Use the link in your booking confirmation email, or <%= mail_to settings[:church_email], "email the All In team" %>.</p>
-      <p class="mt-6"><%= link_to "Open my Personal Ministry Plan", my_plan_path, class: "btn-go" %></p>
+      <p class="mt-4 text-sm text-mute">Come ready to meet the team, connect, ask questions, and receive prayer. Need to change your RSVP? <%= mail_to settings[:church_email], "Email the All In team" %>.</p>
+      <p class="mt-6"><%= link_to "Open my profile", my_plan_path, class: "btn-go" %></p>
     <% else %>
-      <h2 class="text-xl font-extrabold">Book your appointment</h2>
+      <h2 class="text-xl font-extrabold">RSVP for the next gathering</h2>
       <ol class="mt-4 space-y-3 text-ink/90 list-decimal pl-5">
-        <li>Open the scheduler and pick a time. A team member from Encounter will meet with you to go over your results and your next steps.</li>
-        <li>Come back here and confirm so we can prepare your Personal Ministry Plan.</li>
+        <li>Open the RSVP page and pick the next Sunday gathering (they happen once a month).</li>
+        <li>Come back here and confirm, so the team can prepare your profile and pray for you by name.</li>
       </ol>
-      <% if settings[:scheduling_url].present? %>
-        <p class="mt-6"><%= link_to "Open scheduler", settings[:scheduling_url], class: "btn-go", target: "_blank", rel: "noopener" %></p>
+      <% if settings[:all_in_gathering_url].present? %>
+        <p class="mt-6"><%= link_to "Open RSVP page", settings[:all_in_gathering_url], class: "btn-go", target: "_blank", rel: "noopener" %></p>
       <% else %>
-        <p class="mt-6 text-sm text-red-300">Scheduling link not configured. Set SCHEDULING_URL (see README).</p>
+        <p class="mt-6 text-sm text-red-300">RSVP link not configured yet. Set ALL_IN_GATHERING_URL (see README).</p>
       <% end %>
 
       <%= form_with url: appointment_path, method: :post, class: "mt-8 border-t border-line pt-6 space-y-4" do |f| %>
         <div>
-          <%= f.label :meeting_preference, "How would you like to meet?", class: "label" %>
-          <%= f.select :meeting_preference, ["In person at Encounter", "Phone call", "Video call (Zoom / FaceTime)"], { include_blank: "Choose one" }, class: "field" %>
+          <%= f.label :scheduled_at, "Which gathering did you RSVP for? (optional)", class: "label" %>
+          <%= f.date_field :scheduled_at, class: "field" %>
         </div>
         <div>
-          <%= f.label :scheduled_at, "When did you book? (optional)", class: "label" %>
-          <%= f.datetime_field :scheduled_at, class: "field" %>
+          <%= f.label :meeting_preference, "Who's coming with you? (optional)", class: "label" %>
+          <%= f.select :meeting_preference, ["Just me", "My spouse and me", "My family", "A friend and me"], { include_blank: "Choose one" }, class: "field" %>
         </div>
-        <%= f.submit "I've scheduled my appointment", class: "btn-go" %>
+        <%= f.submit "I've RSVP'd", class: "btn-go" %>
       <% end %>
 
-      <% if settings[:all_in_gathering_url].present? %>
-        <p class="mt-6 text-sm text-mute">Prefer to meet the team in a room full of new people? <%= link_to "Register for the next All In gathering", settings[:all_in_gathering_url], target: "_blank", rel: "noopener" %>.</p>
+      <% if settings[:scheduling_url].present? %>
+        <p class="mt-6 text-sm text-mute">Can't make a Sunday gathering? <%= link_to "Book a one-on-one with the team instead", settings[:scheduling_url], target: "_blank", rel: "noopener" %>.</p>
       <% end %>
     <% end %>
   </div>

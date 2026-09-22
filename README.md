@@ -1,200 +1,143 @@
-# All In — Encounter Church NY
+# All In — Encounter Church NY · Go-live guide
 
-A replica of the Mercy Culture "Connect" new-member pathway, rebuilt for Encounter Church with a black / dark-blue theme.
+Status as of Sep 22, 2026: the app is **built, deployed, and running** at https://all-in-wvrx.onrender.com with Postgres on Render, all five videos on Vimeo, admin working. This README is only what's left to make it live at `allin.encounterny.com` and fully operational. Do the sections in order; each says who can do it and how long it takes.
 
-**Stack (matches what powers Mercy Culture's app):** Ruby on Rails 7.2 · PostgreSQL · Devise (register / sign in / profile) · Active Storage for thumbnails (Cloudflare R2 in production) · Vimeo Player for video · Cloudflare in front · Tailwind CSS · Hotwire (Turbo + Stimulus). Optional: Planning Center handoff, any scheduling tool for Step Three.
-
-**What a person experiences (same shape as Connect):**
-
-| Screen | Path | What it does |
-|---|---|---|
-| My Next Step | `/` | One card: the current step + Continue |
-| My Progress | `/my_progress` | Three steps. Lessons unlock in order; assessments unlock after Step One; appointment unlocks after all three assessments |
-| Lesson | `/lessons/:slug` | Vimeo embed; **Next** enables only when the video ends (or a text lesson is read) |
-| Assessment | `/assessments/:slug` | 1–5 scale questions, scored by category |
-| Results / Plan | `/assessments/:slug/results`, `/my_plan` | Top categories with descriptions and where they fit at Encounter |
-| Appointment | `/appointment` | Opens your scheduler, then the person confirms they've booked |
-| FAQ, Account | `/faq`, `/users/edit` | |
-| Admin | `/admin` | People + progress, edit lessons / Vimeo IDs / thumbnails, appointments |
-
-> ⚠️ This codebase was written without being booted (no Ruby in the authoring environment). Expect to fix a handful of small things on first run — Part 1 below walks you through it. Everything is standard Rails, so errors will be ordinary and Googleable.
+Stack recap: Rails 7.2 · Postgres (Render) · Devise auth · Active Storage thumbnails (Cloudflare R2) · Vimeo · Tailwind/Hotwire · Docker on Render.
 
 ---
 
-## Part 1 — Run it on your laptop (30–45 min)
+## 0. Apply this update (you, 10 min)
 
-### 1.1 Install Ruby and Postgres
+This release changes content and adds the profile feature. From the repo root:
 
-**macOS**
 ```bash
-brew install rbenv ruby-build postgresql@16 libvips
-rbenv install 3.3.6 && rbenv global 3.3.6
-brew services start postgresql@16
-```
-**Ubuntu / WSL**
-```bash
-sudo apt install -y git curl libssl-dev libreadline-dev zlib1g-dev libyaml-dev libpq-dev postgresql libvips
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash   # then follow its PATH instructions
-rbenv install 3.3.6 && rbenv global 3.3.6
-sudo -u postgres createuser -s $USER
-```
-Check: `ruby -v` → 3.3.6, `psql --version`.
-
-### 1.2 Install gems and generate the two files Rails must create itself
-```bash
-cd all-in
-gem install bundler
-bundle install
-bin/rails active_storage:install     # creates the Active Storage migration (thumbnails)
-```
-If `bundle install` complains about `tailwindcss-ruby`, run `bundle update tailwindcss-rails tailwindcss-ruby`.
-
-### 1.3 Create the database, load content, start
-```bash
-cp .env.example .env               # edit later; defaults work locally
-bin/rails db:create db:migrate
-bin/rails db:seed                  # steps, 8 lessons, 3 assessments (91 questions), admin user
-bin/dev                            # runs Rails + Tailwind watcher (installs foreman if needed)
-```
-Open http://localhost:3000. Sign in as **admin@encounterny.com / changeme-now**, then go to Account and change the password.
-
-### 1.4 Things that commonly need a nudge on first boot
-- **`Missing tailwind.css`** → run `bin/rails tailwindcss:build` once.
-- **Stimulus controllers not loading / `bin/importmap` missing** → run `bin/rails importmap:install` (it only adds the `bin/importmap` helper; `config/importmap.rb` is already set up).
-- **`SECRET_KEY_BASE` error in development** → `bin/rails secret` and put it in `.env` as `SECRET_KEY_BASE=...` (Rails normally generates `tmp/local_secret.txt` for you).
-- **Thumbnail variants failing** → `libvips` isn't installed (see 1.1). Thumbnails are optional; the UI falls back to a blue gradient.
-- **Video says "coming soon"** → expected until you add Vimeo IDs (Part 3).
-
-### 1.5 Test the whole journey in 5 minutes
-1. Create a normal account at `/users/sign_up` (use a different email than the admin).
-2. Lessons without a video yet show **Next** immediately, so you can click through Step One.
-3. Take the three assessments; watch Step Three unlock; confirm the appointment.
-4. `bin/rails all_in:reset[that@email.com]` resets that person so you can test again.
-
----
-
-## Part 2 — Accounts you need to create (do these before Part 3)
-
-| # | Service | What for | Cost |
-|---|---|---|---|
-| 1 | **Vimeo** (Plus or Pro) | Hosting the lesson videos privately, embedded only on your domain | Plus ~$12/mo, Pro ~$20/mo — Free tier won't allow domain-restricted embeds |
-| 2 | **Cloudflare** (Free) | DNS for `allin.encounterny.com`, TLS, caching, bot protection | Free |
-| 3 | **Cloudflare R2** | Storage for lesson thumbnails (S3-compatible) | Free tier is plenty |
-| 4 | **Render** (or Fly.io / Railway) | Hosting the Rails app + Postgres | ~$7–15/mo each for web + DB |
-| 5 | **Email sender** — Resend (recommended), Postmark, or SendGrid | Password-reset emails | Free tier |
-| 6 | **Scheduler for Step Three** — Calendly (free) *or* Planning Center Calendar / Church Center | Booking the All In appointment | Free |
-| 7 | *(Optional)* Planning Center Personal Access Token | Push finished people into a PCO Workflow | Included in your PCO plan |
-
-You already have: encounterny.com DNS (Clover) and Planning Center (ecny.churchcenter.com).
-
----
-
-## Part 3 — Vimeo (your two 2 GB videos)
-
-1. Create the Vimeo account and, in **Settings → Videos → Privacy**, set the default to **Private** with **Embed: Specific domains**.
-2. Add these domains to the embed allow-list: `allin.encounterny.com`, `localhost:3000`, and (optionally) an ngrok domain for testing on your phone.
-3. Upload the two videos (web uploader handles 2 GB; use a wired connection). Suggested mapping:
-   - Video A → **Welcome to All In** (lesson slug `welcome`)
-   - Video B → **Our Story | Pastors Zack & Rachelle** (lesson slug `our-story`)
-   If your two videos are something else, use `docs/CONTENT_GUIDE.md` to decide which lesson each belongs to.
-4. On each video page, the URL looks like `https://vimeo.com/123456789` → **123456789** is the Vimeo ID.
-   If the privacy setting is **Unlisted**, the URL has an extra `/abcdef1234` or `?h=abcdef1234` — that's the **vimeo_hash**.
-5. In the app: sign in as admin → **Admin → Lessons → Edit** → paste the Vimeo ID (and hash if unlisted) → **Save**.
-   Also upload a 16:9 JPG thumbnail there (a still from the video works).
-6. Set video titles/descriptions in Vimeo to "Do not show" and turn off the Vimeo end-screen ("Show Vimeo logo / related videos") so the player looks clean.
-7. For the remaining five video lessons, record using the speaker notes in **Admin → Lessons** (also in `docs/CONTENT_GUIDE.md`). Until a video is added, that lesson shows "Video coming soon" and Next is enabled so people aren't blocked. If you'd rather hide an unfinished lesson entirely, untick **Published**.
-
----
-
-## Part 4 — Deploy to Render + Cloudflare (60–90 min)
-
-### 4.1 Push the code
-```bash
-git init && git add . && git commit -m "All In"
-gh repo create encounter-all-in --private --source=. --push    # or push to any GitHub repo
+# copy the updated files from all-in-update.zip over your repo (it only contains changed/new files)
+unzip -o ~/Downloads/all-in-update.zip -d .
+git add -A
+git commit -m "Five-video pathway, gathering RSVP, profile + learn-more"
+git push origin main
 ```
 
-### 4.2 Render
-1. Render dashboard → **New → Blueprint** → pick the repo. `render.yaml` creates the web service + Postgres.
-2. Fill in the env vars marked `sync: false` (values from Parts 2, 3, 5, 6). Set `ADMIN_EMAIL` to your email and `ADMIN_PASSWORD` to something strong — the first deploy seeds the admin account with it.
-3. Deploy. The `release` step in `Procfile` runs migrations and seeds automatically.
-4. Test at the `*.onrender.com` URL. (Vimeo embeds won't play yet because that domain isn't allow-listed — that's fine.)
+Render auto-deploys. The pre-deploy command (`bin/rails db:prepare db:seed`) runs the new `growth_interests` migration and re-seeds:
 
-### 4.3 Cloudflare
-1. If encounterny.com's DNS isn't already on Cloudflare: add the site in Cloudflare (Free), import DNS, and change nameservers at your registrar. **Do not remove the existing records** — Clover keeps serving `encounterny.com` exactly as before; you're only adding a subdomain.
-   If you'd rather not move DNS, add a **CNAME `allin` → `<your-app>.onrender.com`** at your current DNS host and skip the rest of 4.3 (you'll lose Cloudflare's proxy features but everything works).
-2. **DNS** → add `CNAME allin → <your-app>.onrender.com`, proxy status **Proxied** (orange cloud).
-3. **SSL/TLS** → mode **Full (strict)**. Render issues the origin certificate automatically once you add the custom domain in Render (**Settings → Custom domains → allin.encounterny.com**).
-4. **SSL/TLS → Edge Certificates** → turn on **Always Use HTTPS**.
-5. **Security → Bots** → turn on Bot Fight Mode (free). Optional: a WAF rule to block `/admin*` from outside the US.
-6. **Caching → Configuration** → leave standard. Rails sends `Cache-Control: private` on logged-in pages so nothing personal is cached.
+- Lessons become the **five real videos** (IDs + unlisted hashes already in `db/seeds.rb`); old lessons 6–8 are deleted.
+- Step Three is now **RSVP for the All In Sunday Gathering** (monthly), matching what the videos say.
+- Results pages get **"Want to grow in any of these?"** checkboxes; **My Profile** (`/my_profile`) shows strengths + growth areas; Admin → People shows them too; Admin → Assessments shows "learn more" demand per category.
 
-### 4.4 Cloudflare R2 (thumbnails)
-1. Cloudflare → **R2 → Create bucket** `all-in-media` (location: automatic).
-2. **R2 → Manage R2 API Tokens → Create API token** → permission **Object Read & Write**, scoped to that bucket. Copy Access Key ID, Secret Access Key, and your Account ID.
-3. Put them in Render env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
+Verify after deploy: sign in as admin → `/admin` shows 5 lessons, all with Vimeo IDs → open `/my_progress` → lesson 1 plays (Render domain is on Vimeo's allow-list).
+
+Local dev (if you want it): `bin/rails db:migrate db:seed` then `bin/dev`.
 
 ---
 
-## Part 5 — Email (password resets)
+## 1. Domain — `allin.encounterny.com` (church GoDaddy admin, 2 min) ← the only blocker
 
-1. Resend → **Domains → Add** `encounterny.com` (or a subdomain like `mail.encounterny.com`) → add the DNS records it shows in Cloudflare.
-2. **API Keys → Create** → use as `SMTP_PASSWORD`; `SMTP_USERNAME=resend`, `SMTP_ADDRESS=smtp.resend.com`, `SMTP_PORT=587`.
-3. `MAIL_FROM=All In <allin@encounterny.com>`.
-4. Test: `/users/password/new` → enter your email → you should get a reset link.
+encounterny.com's DNS is at **GoDaddy** (nameservers `ns45/ns46.domaincontrol.com`). A subdomain can only be created inside that account; it can't be registered separately.
 
----
+Ask the admin to do exactly this:
 
-## Part 6 — Step Three scheduling handoff
+> GoDaddy → My Products → next to **encounterny.com** click **DNS** → **Add New Record**
+> Type **CNAME** · Name **allin** · Value **all-in-wvrx.onrender.com** · TTL default → Save.
+> Don't change any other record.
 
-**Option A — Calendly (fastest).** Create a free Calendly account for the All In team → new event type "All In Appointment" (30 min) → add each connector's availability (round-robin needs a paid plan; a single shared calendar is free) → copy the booking link → set `SCHEDULING_URL`.
+Better long-term: ask them to also add you as a **Delegate** (Account Settings → Delegate Access → invite your email, "Products, Domains & Purchase"). You'll need DNS again for email (section 4).
 
-**Option B — Planning Center.** Create a Church Center **Registrations** event with time slots ("All In Appointment"), copy its public link, set `SCHEDULING_URL`. Set `ALL_IN_GATHERING_URL` to your monthly **All In gathering** registration link so the appointment page also offers the group option.
+Then, you:
+1. `nslookup allin.encounterny.com` → should answer `all-in-wvrx.onrender.com` (minutes to an hour).
+2. Render → all-in → Settings → Custom Domains → the row flips to **Verified**, certificate issues automatically. (Already added; nothing to click except the refresh icon.)
+3. Vimeo → Settings → Videos → Upload defaults → Privacy → **Where can your videos be embedded?** → confirm `allin.encounterny.com` is in the list (add if missing; keep `all-in-wvrx.onrender.com` until launch, then remove it).
+4. Open https://allin.encounterny.com and play a lesson.
 
-The app doesn't need an API from the scheduler: the person books there, comes back, and taps **I've scheduled my appointment**. Your team sees it under **Admin → Appointments**.
+**Cloudflare (DNS/proxy) is not needed.** Only use it if the church later wants encounterny.com's nameservers moved to Cloudflare — separate decision, not required for launch.
 
-### Optional: automatic Planning Center handoff
-When someone confirms their appointment, the app can create/match them in **People** and drop a card in a **Workflow** so your follow-up runs in PCO:
-1. Planning Center → People → **Workflows → New** "All In follow-up" with steps like *Assign connector → Appointment held → Invite to All In gathering → Connected to a group*. Note the ID in the URL.
-2. https://api.planningcenteronline.com/oauth/applications → **Personal Access Tokens → Create** (People scope). Copy App ID + Secret.
-3. Set `PCO_APP_ID`, `PCO_SECRET`, `PCO_WORKFLOW_ID` in Render. Done — `app/services/planning_center.rb` does the rest.
-
----
-
-## Part 7 — Editing content
-
-- **Lessons** (titles, order, descriptions, text bodies, Vimeo IDs, thumbnails, speaker notes): **Admin → Lessons**. Formatting in text bodies: blank line = paragraph, `## Heading`, `- bullet`, `**bold**`, `> quote`.
-- **Steps' titles/descriptions, assessment questions and category write-ups**: edit `db/seeds.rb` and run `bin/rails db:seed` again (locally, or `render ssh` → `bin/rails db:seed`). Seeds are idempotent — they update existing records by slug/position and never delete people's answers.
-- **FAQ, Terms, Privacy**: `app/views/pages/*.html.erb`.
-- **Theme**: `config/tailwind.config.js` (colors) and `app/assets/stylesheets/application.tailwind.css`.
-- **Church name / email / links**: env vars (`CHURCH_NAME`, `CHURCH_EMAIL`, `SCHEDULING_URL`, `ALL_IN_GATHERING_URL`).
-
-Make someone an admin: `bin/rails "all_in:admin[their@email.com]"`.
+**Stopgap if the admin is unreachable:** buy a domain you own (e.g. `encounterallin.com`, ~$12/yr) at any registrar, add the same CNAME there, add it in Render → Custom Domains and in Vimeo's allow-list, and set `APP_HOST` in Render → Environment to it. Switch to the real subdomain later.
 
 ---
 
-## Part 8 — Launch checklist (maps to your roadmap Phase 7)
+## 2. Cloudflare R2 — lesson thumbnails (you, 10 min)
 
-- [ ] All 8 lessons reviewed by pastors; Five C's wording finalized
-- [ ] Vimeo IDs on all video lessons (`bin/rails all_in:status` shows gaps) or unfinished ones unpublished
-- [ ] Thumbnails uploaded
-- [ ] Assessment category write-ups reviewed; serve-team names match your real teams
-- [ ] `SCHEDULING_URL` live and tested end-to-end by a team member
-- [ ] Password-reset email received on a real inbox
-- [ ] Terms & Privacy replaced with reviewed text
-- [ ] Pilot: 5–10 people from one Encounter Group go through it on their phones; fix gaps
-- [ ] Add "Start the All In pathway → allin.encounterny.com" to the Clover site menu and the Sunday connect card
-- [ ] Train connectors on **Admin → People** (they can see results before the appointment)
+Domain-independent. Without it, thumbnails fall back to a blue gradient (fine for launch, but nicer with stills).
+
+1. dash.cloudflare.com → **Storage & databases → R2 Object Storage** → **Create bucket** → `all-in-media`, location Automatic.
+2. R2 overview → **Manage R2 API Tokens** (now lands on Account API tokens) → **Create Token** → Custom → name `all-in-render` → Permissions: **Workers R2 Storage → Edit** (or "Object Read & Write" if offered) → Account resources: your account → (bucket scope `all-in-media` if offered) → Create.
+3. On the confirmation page copy the **S3 client credentials**: Access Key ID and Secret Access Key (shown once). If the page shows only an API token and no S3 credentials, the permissions were wrong — delete and redo.
+4. **Account ID**: 32-char hex on the R2 overview page (also in the dashboard URL).
+5. Render → all-in → **Environment** → `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`; `R2_BUCKET` = `all-in-media` → Save (auto-redeploy).
+6. Test: Admin → Lessons → Edit → upload a 1920×1080 JPG still → Save → My Progress shows it.
 
 ---
 
-## Project layout
+## 3. Gathering RSVP link — Step Three (church office / you, 15 min)
+
+Step Three sends people to `ALL_IN_GATHERING_URL`. Use Planning Center since the church already runs Church Center:
+
+1. Planning Center **Registrations** (or Calendar) → New event **"All In Sunday Gathering"** → add the next date(s) → capacity as needed → publish to Church Center.
+2. Copy the public Church Center link (looks like `https://ecny.churchcenter.com/registrations/events/…`). Tip: create a recurring or "next gathering" signup page so the link never changes.
+3. Render → Environment → `ALL_IN_GATHERING_URL` = that link → Save.
+
+Optional one-on-one fallback (shown on the RSVP page as "Can't make a Sunday?"): create a free **Calendly** event "All In conversation" and set `SCHEDULING_URL`. Leave blank to hide it.
+
+---
+
+## 4. Email — password resets (you + GoDaddy admin, 20 min)
+
+Only affects "Forgot password". Everything else works without it.
+
+1. resend.com → sign up (free) → **Domains → Add domain** `encounterny.com` (or `mail.encounterny.com` to keep it separate).
+2. Resend shows 3 DNS records (SPF TXT, DKIM TXT, MX for bounces). **Send them to the GoDaddy admin in the same request as the CNAME** from section 1.
+3. Resend → **API Keys → Create** → copy.
+4. Render → Environment: `SMTP_ADDRESS=smtp.resend.com`, `SMTP_PORT=587`, `SMTP_USERNAME=resend`, `SMTP_PASSWORD=<api key>`, `MAIL_FROM=All In <allin@encounterny.com>` → Save.
+5. Test: `/users/password/new` with your email.
+
+Interim without DNS access: a church Google Workspace mailbox with an **app password** works — `SMTP_ADDRESS=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USERNAME=<mailbox>`, `SMTP_PASSWORD=<app password>`, `MAIL_FROM=<mailbox>`.
+
+---
+
+## 5. Optional — Planning Center handoff (you, 15 min)
+
+When someone confirms their RSVP, the app can create/match them in **People** and drop a card on a **Workflow** so follow-up runs where the team already works.
+
+1. Planning Center People → **Workflows → New** "All In follow-up" with steps like *Attended gathering → Connected to group / serve team → Member*. Note the numeric ID in the URL.
+2. https://api.planningcenteronline.com/oauth/applications → **Personal Access Tokens → Create** (People scope) → copy Application ID + Secret.
+3. Render → Environment → `PCO_APP_ID`, `PCO_SECRET`, `PCO_WORKFLOW_ID` → Save. Code: `app/services/planning_center.rb`.
+
+---
+
+## 6. Content and copy review (pastors + you, 1 hour)
+
+- **Lessons**: Admin → Lessons → read each summary under the video (written from the transcripts); fix anything that doesn't sound like Encounter. Upload a thumbnail still for each (section 2).
+- **Assessments**: Admin → Assessments → review statements and category write-ups. Edit the `serve:` lists in `db/seeds.rb` to match real Serve Team names, then push (seeds re-run on deploy; answers are preserved).
+- **FAQ / Terms / Privacy**: `app/views/pages/*.html.erb` — Terms and Privacy are placeholders and need pastoral sign-off.
+- Church email is `Connect@EncounterNY.com` via `CHURCH_EMAIL`; change in Render → Environment if needed.
+
+---
+
+## 7. Launch checklist
+
+- [ ] CNAME live, Render shows Verified, `https://allin.encounterny.com` plays a lesson
+- [ ] Render domain removed from Vimeo's allow-list (after launch)
+- [ ] `ALL_IN_GATHERING_URL` set and tested end-to-end (RSVP page opens the Church Center event)
+- [ ] Thumbnails uploaded (R2 configured)
+- [ ] Password-reset email received
+- [ ] Terms & Privacy replaced
+- [ ] Admin password rotated (Account page); at least one pastor/team member made admin: `bin/rails "all_in:admin[email]"` via Render → Shell, or ask them to sign up and run it
+- [ ] Pilot: 5–10 people from one Encounter Group do the whole pathway on their phones (`bin/rails "all_in:reset[email]"` resets a tester)
+- [ ] Clover site: add "All In → allin.encounterny.com" to the Connect menu; mention it in the Sunday announcement (the videos ask people to complete all five before they RSVP)
+- [ ] Team trained on Admin → People (strengths + "wants to learn more" are on each person's page) and Admin → RSVPs
+
+---
+
+## Where things live
+
 ```
-app/services/pathway.rb          gating logic: what's locked, current, complete; "My Next Step"
-app/services/planning_center.rb  optional PCO handoff
-app/controllers/                 dashboard (next step), progress, lessons, assessments, appointments, admin/*
-app/views/                       all screens; devise/ = auth; admin/ = team tools
-app/javascript/controllers/      vimeo_controller.js (marks complete on "ended"), assessment_controller.js
-db/seeds.rb                      ALL content: steps, lessons + speaker notes, 3 assessments
-docs/CONTENT_GUIDE.md            video plan, scripts outline, how the lessons map to the All In roadmap
+db/seeds.rb                          ALL content: 3 steps, 5 lessons (Vimeo IDs, summaries), 3 assessments
+app/services/pathway.rb              gating: lessons → assessments → gathering RSVP
+app/controllers/growth_interests_controller.rb   "learn more" opt-ins
+app/views/assessments/plan.html.erb  My Profile
+app/views/appointments/show.html.erb Step Three (gathering RSVP)
+app/services/planning_center.rb      optional PCO handoff
+docs/ROADMAP.md                      running future classes on this engine
+docs/CONTENT_GUIDE.md                video/lesson mapping and transcript notes
 ```
+
+Useful commands (Render → all-in → Shell): `bin/rails all_in:status` · `bin/rails "all_in:admin[email]"` · `bin/rails "all_in:reset[email]"` · `bin/rails db:seed`

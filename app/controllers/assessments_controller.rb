@@ -44,6 +44,7 @@ class AssessmentsController < ApplicationController
   end
 
   def require_unlocked
+    return if current_user.admin?
     return if pathway.assessment_unlocked?(@assessment)
     redirect_to my_progress_path, alert: "Finish Step One to unlock the assessments."
   end

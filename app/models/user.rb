@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :lesson_completions, dependent: :destroy
   has_many :completed_lessons, through: :lesson_completions, source: :lesson
   has_many :assessment_results, dependent: :destroy
+  has_many :growth_interests, dependent: :destroy
   has_one  :appointment, dependent: :destroy
 
   validates :first_name, :last_name, presence: true
@@ -20,4 +21,21 @@ class User < ApplicationRecord
   end
 
   def pathway = @pathway ||= Pathway.new(self)
+
+  # ---- Profile: what the assessments say about this person ----
+  # Top categories across every completed assessment: [[assessment, [[category, score], ...]], ...]
+  def strengths
+    assessment_results.includes(:assessment).select(&:complete?).sort_by { |r| r.assessment.position }
+      .map { |r| [r.assessment, r.top] }
+  end
+
+  # Categories the person asked to learn more about, grouped by assessment.
+  def growth_areas
+    growth_interests.includes(:assessment).group_by(&:assessment).sort_by { |a, _| a.position }
+      .map { |a, list| [a, list.map(&:category)] }
+  end
+
+  def growth_interest?(assessment, category)
+    growth_interests.any? { |g| g.assessment_id == assessment.id && g.category == category }
+  end
 end

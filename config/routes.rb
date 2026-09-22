@@ -13,17 +13,20 @@ Rails.application.routes.draw do
   end
 
   resources :assessments, only: [:index, :show, :create] do
-    get :results, on: :member
+    get  :results,   on: :member
+    post :interests, on: :member, to: "growth_interests#update"  # "I'd like to learn more about…"
   end
-  get "my_plan", to: "assessments#plan"     # Personal Ministry Plan (all results)
+  get "my_plan",    to: "assessments#plan"   # My Profile: strengths + growth areas (Personal Ministry Plan)
+  get "my_profile", to: redirect("/my_plan")
 
-  resource :appointment, only: [:show, :create]
+  resource :appointment, only: [:show, :create]  # Step Three: RSVP for the All In Sunday Gathering
+  get "gathering", to: redirect("/appointment")
 
   namespace :admin do
     root "dashboard#index"
     resources :users, only: [:index, :show]
     resources :lessons, only: [:index, :edit, :update]
-    resources :appointments, only: [:index, :update]
     resources :assessments, only: [:index, :show]
+    resources :appointments, only: [:index, :update]
   end
 end

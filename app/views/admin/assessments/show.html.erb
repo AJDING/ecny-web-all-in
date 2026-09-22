@@ -9,11 +9,11 @@
   <% end %>
 </ol>
 
-<h2 class="text-lg font-extrabold mt-10">Category write-ups</h2>
+<h2 class="text-lg font-extrabold mt-10">Category write-ups <span class="text-mute text-sm font-normal">(with "learn more" demand)</span></h2>
 <div class="mt-3 grid gap-4 md:grid-cols-2">
   <% @assessment.categories.each do |name, info| %>
     <div class="card p-4">
-      <h3 class="font-bold"><%= name %></h3>
+      <div class="flex justify-between"><h3 class="font-bold"><%= name %></h3><span class="text-xs text-mute"><%= @interest_counts[name].to_i %> want to learn more</span></div>
       <p class="text-sm text-ink/90 mt-2"><%= info["summary"] %></p>
       <p class="text-xs text-mute mt-2">Serve: <%= Array(info["serve"]).join(", ") %></p>
     </div>

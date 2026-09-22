@@ -2,7 +2,7 @@
 <div class="wrap">
   <p class="kicker text-center">STEP TWO</p>
   <h1 class="h-step text-center mt-1"><%= @assessment.title %></h1>
-  <p class="lead text-center mt-2">Your top <%= @assessment.top_n %></p>
+  <p class="lead text-center mt-2">Your top <%= @assessment.top_n %> — these become part of your profile</p>
 
   <div class="mt-8 space-y-4">
     <% @ranked.first(@assessment.top_n).each_with_index do |(cat, score), i| %>
@@ -21,17 +21,31 @@
     <% end %>
   </div>
 
-  <details class="card mt-6 p-6">
-    <summary class="cursor-pointer font-semibold">All scores</summary>
-    <ul class="mt-4 space-y-3">
-      <% @ranked.each do |cat, score| %>
-        <li><div class="flex justify-between text-sm"><span><%= cat %></span><span class="text-mute"><%= score %>%</span></div><div class="bar mt-1"><span style="width:<%= score %>%"></span></div></li>
-      <% end %>
-    </ul>
-  </details>
+  <%# ---- Learn more: the categories outside the top N, lowest first ---- %>
+  <% rest = @ranked.drop(@assessment.top_n) %>
+  <% if rest.any? %>
+    <%= form_with url: interests_assessment_path(@assessment), method: :post, class: "card mt-6 p-6" do |f| %>
+      <h2 class="text-lg font-extrabold">Want to grow in any of these?</h2>
+      <p class="text-mute text-sm mt-1">A lower score isn't a weakness — it's often just unexplored. Tick anything you'd like to learn more about and we'll bring it to your All In gathering and shape future classes around it.</p>
+      <ul class="mt-5 space-y-3">
+        <% rest.each do |cat, score| %>
+          <li class="flex items-start gap-3">
+            <input type="checkbox" name="categories[]" value="<%= cat %>" id="gi-<%= cat.parameterize %>"
+                   <%= "checked" if current_user.growth_interest?(@assessment, cat) %>
+                   class="mt-1 h-4 w-4 rounded border-line bg-panel text-royal focus:ring-royal">
+            <label for="gi-<%= cat.parameterize %>" class="flex-1 cursor-pointer">
+              <span class="flex justify-between text-sm"><span class="font-semibold"><%= cat %></span><span class="text-mute"><%= score %>%</span></span>
+              <span class="block text-xs text-mute mt-0.5"><%= @assessment.category_info(cat)[:summary].to_s.truncate(110) %></span>
+            </label>
+          </li>
+        <% end %>
+      </ul>
+      <div class="mt-6 flex items-center justify-between">
+        <%= link_to "Retake", assessment_path(@assessment), class: "btn-link" %>
+        <%= f.submit "Save to my profile", class: "btn-go" %>
+      </div>
+    <% end %>
+  <% end %>
 
-  <div class="mt-8 flex items-center justify-between">
-    <%= link_to "Retake", assessment_path(@assessment), class: "btn-link" %>
-    <%= link_to "Back to My Progress", my_progress_path, class: "btn-go" %>
-  </div>
+  <p class="mt-8 text-center"><%= link_to "Back to My Progress", my_progress_path, class: "btn-ghost" %></p>
 </div>

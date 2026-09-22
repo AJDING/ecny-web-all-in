@@ -6,179 +6,144 @@
 
 puts "Seeding steps…"
 learn  = Step.find_or_initialize_by(slug: "learn").tap  { |s| s.update!(position: 1, title: "Learn About Encounter",
-           description: "Hear our story, what we believe, and how we do church — through a few short videos and readings.") }
+           description: "Five short videos from our pastors and team: our story, our values, the Five C's of membership, and how to join well.") }
 assess = Step.find_or_initialize_by(slug: "assess").tap { |s| s.update!(position: 2, title: "Discover Your Design",
-           description: "Three short assessments that help you discover how you connect with God and how you're built to serve.") }
-meet   = Step.find_or_initialize_by(slug: "meet").tap   { |s| s.update!(position: 3, title: "Your All In Appointment",
-           description: "Meet one-on-one with someone from our team to go over your results, pray together, and find your place at Encounter.") }
+           description: "Three short assessments that show how you connect with God, how you're gifted, and how you're wired — and where you'd like to grow.") }
+meet   = Step.find_or_initialize_by(slug: "meet").tap   { |s| s.update!(position: 3, title: "The All In Sunday Gathering",
+           description: "Once a month on a Sunday we move from information to relationship: meet our pastors and leaders, ask questions, receive prayer, and take your next steps into the life of Encounter.") }
 
 puts "Seeding lessons…"
+# Vimeo IDs and unlisted hashes come from the church's Vimeo library (Sep 2026 uploads).
 lessons = [
   {
-    slug: "welcome", position: 1, kind: "video",
+    slug: "welcome", position: 1, kind: "video", vimeo_id: "1227203543", vimeo_hash: "493c66b86f",
     title: "Welcome to All In",
-    description: "What All In is and what the next three steps look like.",
-    body: "All In has three steps: learn about Encounter, discover how you're designed, and meet with our team. You can pause and come back any time — your progress is saved.",
-    speaker_notes: <<~NOTES
-      TARGET LENGTH: 2–3 min. Host: a pastor or All In team lead, warm and direct.
-      - "One encounter with Jesus will change your life forever." Say it, then own it: that's why this church exists.
-      - What All In is: not a class, not a hoop. It's how we make sure nobody stays a stranger.
-      - The three steps (show them on screen): Learn · Discover · Meet.
-      - What they'll get at the end: a Personal Ministry Plan and a real person who knows their name.
-      - Practical: 7 short items, ~30 min of assessments, one appointment. Do it on your phone.
-      - Close: "We're glad you're here. Let's go all in."
-    NOTES
+    description: "Silvana explains what All In is and what the next steps look like. (2:31)",
+    body: <<~BODY
+      We never want church to feel like a place where you come in on a Sunday, attend a service, and leave. All In is our way of helping you take the next steps toward belonging — to be known, to grow, and to become part of the life of the church.
+
+      ## What to expect
+
+      - Five short videos, including this one, each giving you more of the heart of Encounter.
+      - Move at your own pace; your progress is saved.
+      - When you've finished all five, you'll be able to RSVP for the next All In Sunday Gathering, held once a month.
+
+      ## The gathering
+
+      That in-person time is where we get to actually connect with you: hear your story, introduce you to some of our leaders, answer your questions, and help you see what your next steps could look like — community, a place to serve, or simply growing in your relationship with Jesus.
+
+      > Please complete all five videos before you RSVP. They're designed to work together and give you important context before we're all in the room together.
+    BODY
   },
   {
-    slug: "our-story", position: 2, kind: "video",
+    slug: "our-story", position: 2, kind: "video", vimeo_id: "1227128030", vimeo_hash: "349cc61341",
     title: "Our Story | Pastors Zack & Rachelle Wechsler",
-    description: "How God led Zack and Rachelle from a Las Vegas coffee house to Rochester.",
-    body: "In 2009, Zack and Rachelle Wechsler planted Encounter Church Las Vegas in a small coffee house. In the spring of 2020 they answered the call to lead what was then New Hope Community Church in North Chili — now Encounter Church New York.",
-    speaker_notes: <<~NOTES
-      TARGET LENGTH: 6–9 min. Pastors Zack & Rachelle, conversational, seated (like the Mercy Culture pastor-story videos).
-      - 2009: a coffee house in Las Vegas. What was the prompt from God? What did the first year feel like?
-      - The people who came: "prostitutes, pimps, drug dealers, the religious, and prodigals" — tell one story (with permission).
-      - The declaration: "What happens in Vegas will not stay in Vegas but will shake the nations."
-      - Spring 2020: the call to Rochester. Leaving after 11 years. What confirmed it?
-      - New Hope becomes Encounter Church NY. The 20,000 sq ft addition — not a building story, a "God makes room" story.
-      - Close with a word to the new person watching: why you're glad they're here.
-    NOTES
-  },
-  {
-    slug: "five-cs", position: 3, kind: "video",
-    title: "The Five C's of All In",
-    description: "What it means to belong here, and how you can be part of it.",
-    body: <<~BODY,
-      ## The Five C's
-
-      - **Christ** — one encounter with Jesus changes everything. Belonging starts with Him, not with us.
-      - **Community** — you were never meant to do this alone. Encounter Groups are where Sunday becomes family.
-      - **Culture** — presence, authentic community, identity in Christ, and love for our world. It's how we act when we're at our best.
-      - **Commitment** — members attend, serve, and give. Not because we need you to, but because that's what family does.
-      - **Commission** — we equip and send. You are a supernatural minister of the gospel, and your world is waiting.
-
-      > Draft for pastoral review. Edit the five words and their one-liners in Admin → Lessons until they sound like Encounter.
-    BODY
-    speaker_notes: <<~NOTES
-      TARGET LENGTH: 5–7 min. Teaching pastor. Whiteboard or on-screen text for each C.
-      - Frame: "Membership isn't a database status. It's a family posture." Then the five C's, one at a time.
-      - Christ / Community / Culture / Commitment / Commission — for each: what it is, what it looks like on a Tuesday, one scripture.
-      - Commitment is the honest one: say plainly that members attend, serve, and tithe, and why that's freedom not pressure.
-      - Close: "Step Two is where we help you see how God built you — take it honestly."
-    NOTES
-  },
-  {
-    slug: "we-believe", position: 4, kind: "text",
-    title: "What We Believe",
-    description: "Our foundational beliefs and the historic faith we stand in.",
+    description: "From a Las Vegas church plant to a dream, an unfinished building, and a yes to Rochester. (5:56)",
     body: <<~BODY
-      ## The historic Christian faith
+      Pastors Zack and Rachelle are from Las Vegas, Nevada — five kids, one grandbaby, and a lifetime in ministry. In 2009 they planted Encounter Church Las Vegas.
 
-      Along with the historic Christian faith, we affirm the Apostles' Creed: one God, Father, Son, and Holy Spirit; Jesus Christ, born of the Virgin Mary, crucified, risen, ascended, and coming again; the forgiveness of sins, the resurrection of the body, and life everlasting.
+      ## The dream
 
-      ## What shapes us
+      In 2019, on their 20th anniversary, Pastor Zack had a vivid dream: flying over a church building, then inside it, with a teaching pastor he knew from Canada, being appointed senior pastor of a church in transition. He messaged that pastor, who had just been standing in an empty, unfinished church building in Rochester whose leaders were looking for a new senior pastor.
 
-      - The Bible is the inspired, authoritative Word of God.
-      - Salvation is by grace through faith in Jesus alone, and it frees us from the power of the devil — sin, lies, sickness, and torment.
-      - The Holy Spirit is active today. Every believer is a supernatural minister of the gospel of power whom signs and wonders should follow.
-      - We embrace the biblical church government of apostles, prophets, evangelists, pastors, and teachers.
-      - Christ is returning for a glorious, overcoming bride — His Church. We are more than "sinners saved by grace"; we are saints, sons and daughters of the King.
+      ## The confirmation
 
-      ## Want to go deeper?
+      They flew out. The building had sat unfinished for 22 years — concrete and dirt — but it matched the dream in every detail. While they prayed, a guest speaker said, "Joseph hinged his entire destiny on one dream." Then the history: Charles Finney, the worship leader turned revivalist of the Second Great Awakening, moved from Henderson, New York to Rochester; the Wechslers were moving from Henderson, Nevada to Rochester — and Finney shares Pastor Zack's birthday.
 
-      Our We Believe page on encounterny.com includes a pastoral paper on speaking in tongues and more. Bring any questions to your All In appointment — nothing is off the table.
+      ## What God has done since
+
+      They said yes and began pastoring in 2020, right as COVID hit. The church was renamed Encounter Church New York, the building campaign was relaunched, and in May 2024 the building was finished. Since then: hundreds baptized, over 550 salvations in two years, healing, freedom, and a growing community of saints.
+
+      > "We welcome you to Encounter Church, and we welcome you to be all in here with us."
     BODY
   },
   {
-    slug: "vision-and-culture", position: 5, kind: "video",
-    title: "Our Vision & Culture",
-    description: "Personal, regional, and global expansion of God's kingdom through His manifest presence.",
-    body: <<~BODY,
-      ## Our vision
+    slug: "five-cs", position: 3, kind: "video", vimeo_id: "1227203541", vimeo_hash: "e05f0d4d05",
+    title: "The Five C's of Membership",
+    description: "Pastor Rachelle on what being All In means: culture, core values, community, covenant, and cultivation. (7:17)",
+    body: <<~BODY
+      Membership at Encounter isn't your name on a list or attending consistently. Being All In means saying, "This is a community I'm choosing to belong to — a house I want to grow in, serve in, build relationships in, and contribute to."
 
-      To see personal, regional, and global expansion of God's kingdom through His manifest presence.
+      ## 1. Culture
 
-      ## Our four core values
+      How we do life and ministry together — the tone, heart, and atmosphere of Encounter. Our vision is to see personal, regional, and global expansion of God's kingdom through His manifest presence. Our first ministry is to God: worship, prayer, His presence, and our relationship with Him are central, not add-ons. Salvation brings freedom and a new way of living, and every believer is called to participate in the work of Jesus — loving, praying, serving, sharing the gospel, and carrying His presence into everyday life.
 
-      - Encounter God's manifest presence
-      - Encounter authentic Christian community
-      - Encounter your identity in Christ
-      - Encounter your world with the love of God
+      ## 2. Core values
 
-      Our first ministry is to God, so we worship with extravagant joy and gratitude. All ministry flows from the prayer, "Thy kingdom come, on earth as it is in heaven." We pastor a city, not just a church.
+      - Encounter God's manifest presence — everything flows from relationship with Him.
+      - Encounter authentic Christian community — following Jesus was never meant to happen alone.
+      - Encounter your identity in Christ — living as sons and daughters, not from shame or fear.
+      - Encounter your world with the love of God — homes, workplaces, schools, and neighborhoods impacted because we're there.
+
+      ## 3. Community
+
+      Church is family, and family requires relationship. EC Kids and YTH for families, the young adults community, serve teams (shoulder to shoulder is one of the fastest ways to build relationships), groups and gatherings through the year. We don't want you to simply attend — we want you to be known.
+
+      ## 4. Covenant
+
+      Where membership becomes personal: the commitment we make to one another as a church family, and sharing in the foundational beliefs of the historic faith — Father, Son, and Spirit, one God; Jesus Christ is Lord; Scripture as our foundation; part of the church Jesus has built throughout history. "These are my people. I'm committed to walking with them, serving with them, growing with them, and carrying the mission God has given this church."
+
+      ## 5. Cultivation
+
+      Membership isn't the goal — becoming a disciple of Jesus is. An environment where your relationship with God keeps growing: Scripture, prayer, worship, community, serving, groups, men's and women's ministries, family discipleship. We equip and send people to carry the works of Jesus.
+
+      > Being All In is choosing to belong, to participate, to grow, and to take ownership of the community God has planted you in.
     BODY
-    speaker_notes: <<~NOTES
-      TARGET LENGTH: 5–7 min. Pastor Zack (or a pastor on staff). Pull the strongest 60 seconds from a recent Sunday message on presence/revival and let it set the tone.
-      - The vision sentence, slowly, twice. Explain each phrase: personal → regional → global; "manifest presence."
-      - Four core values as four encounters: presence, community, identity, world. One story for each.
-      - "Our first ministry is to God" — why worship is loud and long here, and why that's not for show.
-      - "We pastor a city, not just a church" — what that means for how a member lives Monday–Saturday.
-    NOTES
   },
   {
-    slug: "healthy-transitions", position: 6, kind: "video",
+    slug: "healthy-transitions", position: 4, kind: "video", vimeo_id: "1227203542", vimeo_hash: "f8a57caa7f",
     title: "Healthy Transitions",
-    description: "Joining well: our heart for how people come to Encounter and how they're sent from it.",
-    body: "If you're coming from another church, we want you to come well — with honor, without secrets, and blessed by the leaders who cared for you before us.",
-    speaker_notes: <<~NOTES
-      TARGET LENGTH: 4–6 min. A pastor with a gentle touch. This one prevents years of relational mess.
-      - Why we ask: most people arrive from somewhere, and how you leave shapes how you'll land.
-      - If you're leaving a healthy church: have the conversation, say thank you, don't take people with you.
-      - If you're leaving a painful situation: you're safe here; we'll walk with you toward forgiveness, not gossip.
-      - If you're already committed elsewhere: stay planted, serve and give there, and keep enjoying us online.
-      - How we send people out (missions, church plants, moves): with blessing. Same standard in both directions.
-    NOTES
-  },
-  {
-    slug: "welcome-to-encounter", position: 7, kind: "text",
-    title: "Welcome to Encounter Church NY",
-    description: "As a member we ask you to attend, serve, and give. Here's where you can plug in.",
+    description: "Amanda on closing one season with honor before stepping into the next. (6:51)",
     body: <<~BODY
-      ## Attend
+      "There is a time for everything, and a season for every activity under the heavens." (Ecclesiastes 3:1) Whenever we enter a new season, we're usually closing another one — and how we move between them matters.
 
-      Sundays at 9am and 11am, 3355 Union St, North Chili. Pre-service prayer happens before each service — you're welcome to join. Can't make it in person? Watch the Sunday stream.
+      ## If Encounter is your first church home
 
-      ## Serve
+      Welcome. The early church devoted themselves to teaching, fellowship, breaking bread, and prayer (Acts 2:42); that kind of shared life develops over time. Give yourself time to build it.
 
-      Our Serve Team makes Sunday happen: hospitality and café, Encounter Kids, Encounter YTH, worship, media and live stream, prayer, parking and safety, and more. Your Step Two results will point you toward a fit, and your All In appointment is where you'll sign up.
+      ## If you're coming from another church
 
-      ## Grow
+      Whatever the story — a genuine sense of God's leading, changed circumstances, or disappointment and hurt — whenever possible, close the chapter with honor before opening the next. "If it is possible, as far as it depends on you, live at peace with everyone." (Romans 12:18)
 
-      Encounter Groups meet across the region — that's where you'll find your people. Grow Nights are our midweek gatherings for teaching and equipping.
+      - Let your previous leadership know what you're sensing, honestly and respectfully.
+      - The goal isn't to unload or accuse. It sounds like: "I wanted to let you know where I am because I value our relationship," or "I'm grateful for what God has done in my life here, and I want to close this season well."
+      - That creates space for clarity, questions, apology, forgiveness, and sometimes reconciliation. "A gentle answer turns away wrath." (Proverbs 15:1)
+      - There's a difference between leaving with peace and leaving in avoidance. Unprocessed hurt quietly follows us into the next season — guarded, suspicious, expecting the past to repeat. "Forgive as the Lord has forgiven you." (Colossians 3:13)
 
-      ## Give
+      ## How we'll treat you
 
-      We honor God with the first of what we have. Members give consistently through pushpay.com/g/encounterchurchnynorthchili or in person on Sunday.
-
-      ## Stay connected
-
-      Subscribe to Encounter Church NY on YouTube, follow us on social, and use the Connect form on encounterny.com any time you have a need or a question.
+      If disappointment or confusion ever appears here, give us the chance to listen and have a conversation rather than quietly carrying it away. And if God leads you into a new season, we want to honor you, pray with you, celebrate you, and send you off well. Healthy church family celebrates people coming in and honors them when God leads them out. (Ephesians 4:2–3)
     BODY
   },
   {
-    slug: "before-step-two", position: 8, kind: "text",
-    title: "Before You Begin Step Two",
-    description: "A word about the assessments and how we'll use your results.",
+    slug: "your-next-step", position: 5, kind: "video", vimeo_id: "1227128029", vimeo_hash: "6d9903f330",
+    title: "Your Next Step: The All In Gathering",
+    description: "Mikey and David wrap up the videos and point you to the monthly Sunday gathering. (3:00)",
     body: <<~BODY
-      You're about to take three short assessments:
+      You are loved, you belong, and there is a place for you here. At Encounter we believe church is family — we want you to be more than someone who attends on Sundays. We want you known, connected, cared for, and growing alongside others.
 
-      - **Connection with God** — the ways you most naturally meet with Him (27 questions).
-      - **Spiritual Gifts** — how the Holy Spirit has equipped you to serve (48 questions).
-      - **Personal Design** — your wiring, and how you work best with others (16 questions).
+      ## What happens next
 
-      Answer for who you actually are today, not who you think a mature Christian should be. There are no wrong answers and no scores to beat. Your results become your Personal Ministry Plan, which we'll walk through together at your All In appointment.
+      - Finish Step Two: three short assessments that show how you're designed. Your results (and the areas you'd like to grow in) become your profile and come with you to the gathering.
+      - RSVP for the next All In Sunday Gathering, held once a month.
 
-      > "We are saints — sons and daughters of the King."
+      ## At the gathering
+
+      We move from information to relationship. You'll meet some of our pastors and leaders, connect with others taking this step, ask questions, and get clarity on your next steps — community, serving, and growing your relationship with Jesus. We take time to pray with you and over you as you become part of the Encounter family and come under its spiritual covering.
+
+      > "You are no longer foreigners and strangers, but fellow citizens with God's people and also members of His household." (Ephesians 2:19) Not a visitor, not an outsider — family.
     BODY
   }
 ]
 
 lessons.each do |attrs|
   Lesson.find_or_initialize_by(slug: attrs[:slug]).tap do |l|
-    l.assign_attributes(attrs.merge(step: learn))
+    l.assign_attributes(attrs.merge(step: learn, published: true))
     l.save!
   end
 end
+# Retire lessons that are no longer part of the five-video pathway (removes their completions too).
+Lesson.where.not(slug: lessons.map { |l| l[:slug] }).destroy_all
 
 # ---------------------------------------------------------------------------
 puts "Seeding assessments…"
