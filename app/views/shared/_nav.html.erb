@@ -7,12 +7,17 @@
       <%= link_to "FAQ", faq_path, class: "btn-link" %>
       <% if user_signed_in? %>
         <%= link_to "My Progress", my_progress_path, class: "btn-link" %>
-        <%= link_to "My Profile", my_plan_path, class: "btn-link" %>
-        <%= link_to "Account", edit_user_registration_path, class: "btn-link" %>
         <%= link_to "Admin", admin_root_path, class: "btn-link" if current_user.admin? %>
-        <%= button_to user_session_path, method: :delete, class: "h-9 w-9 rounded-full bg-panel border border-line text-xs font-extrabold text-ink hover:border-royal", title: "Sign out #{current_user.full_name}" do %>
-          <%= current_user.initials %>
-        <% end %>
+        <details class="relative">
+          <summary class="list-none cursor-pointer h-9 w-9 rounded-full bg-panel border border-line text-xs font-extrabold text-ink flex items-center justify-center hover:border-royal select-none [&::-webkit-details-marker]:hidden" title="<%= current_user.full_name %>" aria-label="Open account menu"><%= current_user.initials %></summary>
+          <div class="absolute right-0 mt-2 w-56 rounded-xl border border-line bg-deep shadow-xl shadow-black/40 p-1.5 z-50">
+            <p class="px-3 pt-2 pb-1 text-xs text-mute truncate"><%= current_user.full_name %></p>
+            <%= link_to "My Profile", my_plan_path, class: "block rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel" %>
+            <%= link_to "Account Settings", edit_user_registration_path, class: "block rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel" %>
+            <div class="my-1 border-t border-line"></div>
+            <%= button_to "Sign out", destroy_user_session_path, method: :delete, data: { turbo: false }, class: "w-full text-left rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel", form_class: "block" %>
+          </div>
+        </details>
       <% else %>
         <%= link_to "Sign in", new_user_session_path, class: "btn-link" %>
         <%= link_to "Start", new_user_registration_path, class: "btn-go !py-2 !px-4" %>
