@@ -1,6 +1,6 @@
-<% page_title "Account" %>
+<% page_title "Account Settings" %>
 <div class="mx-auto max-w-md px-5">
-  <h1 class="h-page">Account</h1>
+  <h1 class="h-page">Account Settings</h1>
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "card mt-8 p-6 md:p-8 space-y-5" }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
     <div class="grid grid-cols-2 gap-4">
@@ -12,16 +12,19 @@
       <% if resource.pending_reconfirmation? %>
         <p class="text-xs text-glow mt-1">Pending: <%= resource.unconfirmed_email %> — check that inbox for the confirmation link. Your current email stays active until then.</p>
       <% else %>
-        <p class="text-xs text-mute mt-1">Changing your email sends a confirmation link to the new address; enter your current password below to change it.</p>
+        <p class="text-xs text-mute mt-1">Changing your email sends a confirmation link to the new address and requires your current password below.</p>
       <% end %>
     </div>
-    <div><%= f.label :phone, "Mobile phone", class: "label" %><%= f.telephone_field :phone, class: "field" %></div>
-    <hr class="border-line">
-    <p class="text-sm text-mute">Leave the password fields blank unless you want to change it.</p>
-    <div><%= f.label :password, "New password", class: "label" %><%= f.password_field :password, autocomplete: "new-password", class: "field" %></div>
-    <div><%= f.label :password_confirmation, "Confirm new password", class: "label" %><%= f.password_field :password_confirmation, autocomplete: "new-password", class: "field" %></div>
-    <div><%= f.label :current_password, "Current password (required to change email or password)", class: "label" %><%= f.password_field :current_password, autocomplete: "current-password", class: "field" %></div>
+    <%= render "devise/shared/phone_fields", f: f %>
+    <div><%= f.label :current_password, "Current password (only needed to change your email)", class: "label" %><%= f.password_field :current_password, autocomplete: "current-password", class: "field" %></div>
     <%= f.submit "Save changes", class: "btn-go w-full" %>
   <% end %>
+
+  <div class="card mt-6 p-6 md:p-8">
+    <h2 class="font-extrabold">Password</h2>
+    <p class="text-sm text-mute mt-1">We'll email <%= resource.email %> a link to choose a new password. No need to remember the old one.</p>
+    <%= button_to "Email me a change-password link", account_password_link_path, method: :post, class: "btn-ghost mt-4" %>
+  </div>
+
   <p class="mt-6 text-center text-xs text-mute">To delete your account, email <%= mail_to settings[:church_email] %>.</p>
 </div>

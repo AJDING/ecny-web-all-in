@@ -13,7 +13,7 @@
       <% p = Pathway.new(u) %>
       <tr class="border-t border-line">
         <td class="py-2"><%= link_to u.full_name, admin_user_path(u) %><%= " · admin" if u.admin? %></td>
-        <td><%= u.email %></td><td><%= u.phone %></td>
+        <td><%= u.email %></td><td><%= u.phone_display %></td>
         <td><div class="flex items-center gap-2"><div class="bar w-24"><span style="width:<%= p.percent %>%"></span></div><span class="text-mute"><%= p.percent %>%</span></div></td>
         <td class="text-mute"><%= l u.created_at, format: :short %></td>
       </tr>

@@ -13,6 +13,33 @@ class User < ApplicationRecord
 
   validates :first_name, :last_name, presence: true
   normalizes :first_name, :last_name, with: ->(v) { v.strip }
+  validates :phone_country, inclusion: { in: CountryCodes::LIST.map { |_, iso, _| iso } }
+
+  # Phone is stored as E.164 ("+15855550123"). Forms edit the national part separately.
+  attr_writer :phone_number
+  before_validation :compose_phone
+
+  def phone_number
+    @phone_number || (phone.present? ? phone.delete_prefix("+#{CountryCodes.dial(phone_country)}") : "")
+  end
+
+  def phone_display
+    phone.present? ? "+#{CountryCodes.dial(phone_country)} #{phone_number}" : nil
+  end
+
+  def send_password_change_link
+    send_reset_password_instructions
+  end
+
+  private
+
+  def compose_phone
+    return if @phone_number.nil?
+    digits = @phone_number.gsub(/\D/, "")
+    self.phone = digits.present? ? "+#{CountryCodes.dial(phone_country)}#{digits}" : nil
+  end
+
+  public
 
   def full_name = "#{first_name} #{last_name}"
   def initials  = "#{first_name.first}#{last_name.first}".upcase

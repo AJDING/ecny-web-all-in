@@ -1,5 +1,5 @@
 <h1 class="text-2xl font-extrabold"><%= @user.full_name %></h1>
-<p class="text-mute text-sm mt-1"><%= @user.email %> <%= "· #{@user.phone}" if @user.phone.present? %> · joined <%= l @user.created_at, format: :long %></p>
+<p class="text-mute text-sm mt-1"><%= @user.email %> <%= "· #{@user.phone_display}" if @user.phone_display.present? %> · joined <%= l @user.created_at, format: :long %></p>
 
 <div class="mt-8 grid gap-6 md:grid-cols-2">
   <section class="card p-5">

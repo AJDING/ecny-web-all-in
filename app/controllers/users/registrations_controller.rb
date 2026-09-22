@@ -1,13 +1,15 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   protected
 
-  # Devise normally requires the current password to change name/phone. Only require it for password/email changes.
+  # Account Settings never changes the password directly (that goes through an emailed link).
+  # Name/phone save freely; changing the email requires the current password.
   def update_resource(resource, params)
-    if params[:password].blank? && (params[:email].blank? || params[:email] == resource.email)
+    params = params.except(:password, :password_confirmation)
+    if params[:email].blank? || params[:email] == resource.email
       params.delete(:current_password)
-      resource.update_without_password(params.except(:password, :password_confirmation))
+      resource.update_without_password(params)
     else
-      super
+      resource.update_with_password(params)
     end
   end
 

@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { registrations: "users/registrations" }
+  devise_for :users, controllers: { registrations: "users/registrations", passwords: "users/passwords" }
+  post "account/password_link", to: "account#password_link", as: :account_password_link  # emails a change-password link
 
   root "dashboard#show"                      # "My Next Step"
   get  "my_progress", to: "progress#show"    # full pathway view
