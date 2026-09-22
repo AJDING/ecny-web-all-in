@@ -136,6 +136,8 @@ lessons = [
   }
 ]
 
+Lesson.where.not(slug: lessons.map { |l| l[:slug] }).destroy_all
+Lesson.where(slug: lessons.map { |l| l[:slug] }).find_each { |l| l.update_columns(position: l.position + 1000) }
 lessons.each do |attrs|
   Lesson.find_or_initialize_by(slug: attrs[:slug]).tap do |l|
     l.assign_attributes(attrs.merge(step: learn, published: true))
