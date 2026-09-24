@@ -35,8 +35,17 @@
       </div>
     </section>
 
+    <%# ---- Combined: strongest categories across every assessment ---- %>
+    <% combined = current_user.assessment_results.select(&:complete?).flat_map { |r| r.scores.map { |cat, sc| ["#{cat} · #{r.assessment.title}", sc] } }.sort_by { |_, v| -v } %>
+    <section class="card mt-6 p-6 md:p-8">
+      <h2 class="text-lg font-extrabold">Your full design</h2>
+      <p class="text-mute text-sm mt-1">Every category from all <%= strengths.size %> assessments on one scale, strongest first (top 12 shown).</p>
+      <%= render "shared/score_chart", ranked: combined.first(12), highlight: 5 %>
+    </section>
+
     <%# ---- Per assessment ---- %>
     <% strengths.each do |a, top| %>
+      <% result = current_user.result_for(a) %>
       <section class="card mt-6 p-6 md:p-8">
         <div class="flex items-baseline justify-between gap-4">
           <h2 class="text-xl font-extrabold"><%= a.title %></h2>
@@ -52,6 +61,10 @@
             </div>
           <% end %>
         </div>
+        <details class="mt-4">
+          <summary class="cursor-pointer text-sm font-semibold text-mute hover:text-ink">All <%= a.categories.size %> categories</summary>
+          <%= render "shared/score_chart", ranked: a.ranked(result), highlight: a.top_n %>
+        </details>
         <% cats = growth.find { |ga, _| ga.id == a.id }&.last %>
         <% if cats.present? %>
           <p class="mt-4 text-sm text-mute">Wants to grow in: <span class="text-ink"><%= cats.join(", ") %></span></p>

@@ -4,7 +4,15 @@
   <h1 class="h-step text-center mt-1"><%= @assessment.title %></h1>
   <p class="lead text-center mt-2">Your top <%= @assessment.top_n %> — these become part of your profile</p>
 
-  <div class="mt-8 space-y-4">
+  <%# ---- Full picture: every category, ranked ---- %>
+  <section class="card mt-8 p-6">
+    <h2 class="text-lg font-extrabold">Your <%= @assessment.title.downcase %> profile</h2>
+    <p class="text-mute text-sm mt-1">All <%= @ranked.size %> categories, strongest first. Scores are the percentage of the maximum for that category.</p>
+    <%= render "shared/score_chart", ranked: @ranked, highlight: @assessment.top_n %>
+  </section>
+
+  <h2 class="kicker mt-10 text-center">YOUR TOP <%= @assessment.top_n %></h2>
+  <div class="mt-4 space-y-4">
     <% @ranked.first(@assessment.top_n).each_with_index do |(cat, score), i| %>
       <% info = @assessment.category_info(cat) %>
       <section class="card p-6">

@@ -55,7 +55,7 @@
             <% if item.status == :current %>
               <%= link_to "Begin", assessment_path(a), class: "pill pill-go" %>
             <% elsif item.status == :complete %>
-              <%= link_to "Results", results_assessment_path(a), class: "pill pill-done underline" %>
+              <%= link_to "Show my results", results_assessment_path(a), class: "pill pill-done underline" %>
             <% else %>
               <%= status_pill(:locked) %>
             <% end %>
@@ -63,9 +63,20 @@
         </div>
       <% end %>
     </div>
-    <% if pathway.assess_complete? %>
-      <p class="mt-5"><%= link_to "View my profile", my_plan_path, class: "btn-ghost" %></p>
-    <% end %>
+      <%# ---- 4th row: the combined picture across all three assessments ---- %>
+      <% full = pathway.assess_complete? %>
+      <div class="rail-row">
+        <span class="node <%= full ? "node-done" : "" %>">
+          <% if full %><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><% end %>
+        </span>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-bold"><%= full ? link_to("Your full design", my_plan_path, class: "text-ink hover:text-glow") : "Your full design" %></h3>
+          <p class="text-sm text-mute mt-1">All three assessments combined into one picture: strengths, serve fits, and where you want to grow.</p>
+        </div>
+        <div class="shrink-0 pt-1">
+          <% if full %><%= link_to "See full design", my_plan_path, class: "pill pill-go" %><% else %><%= status_pill(:locked) %><% end %>
+        </div>
+      </div>
   </section>
 
   <%# ---- Step Three ---- %>

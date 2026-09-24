@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   end
 
   resources :assessments, only: [:index, :show, :create] do
+    post :submit,    on: :member, to: "assessments#create"       # answers form posts here
     get  :results,   on: :member
     post :interests, on: :member, to: "growth_interests#update"  # "I'd like to learn more about…"
   end

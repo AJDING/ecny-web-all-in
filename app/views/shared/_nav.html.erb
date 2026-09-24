@@ -1,21 +1,27 @@
 <header class="border-b border-line/70">
   <div class="mx-auto max-w-6xl px-5 h-16 flex items-center">
-    <%= link_to root_path, class: "flex items-baseline gap-1.5 text-ink hover:text-white", aria: { label: "All In home" } do %>
-      <span class="text-xl font-extrabold tracking-tight">all in<span class="text-royal">.</span></span>
+    <%= link_to root_path, class: "flex items-center", aria: { label: "All In home" }, title: "All In · Encounter Church" do %>
+      <%= image_tag "ec-logo-ring.png", alt: "Encounter Church", class: "h-11 w-11" %>
     <% end %>
     <nav class="ml-auto flex items-center gap-5 text-sm font-semibold">
       <%= link_to "FAQ", faq_path, class: "btn-link" %>
       <% if user_signed_in? %>
         <%= link_to "My Progress", my_progress_path, class: "btn-link" %>
         <%= link_to "Admin", admin_root_path, class: "btn-link" if current_user.admin? %>
-        <details class="relative">
-          <summary class="list-none cursor-pointer h-9 w-9 rounded-full bg-panel border border-line text-xs font-extrabold text-ink flex items-center justify-center hover:border-royal select-none [&::-webkit-details-marker]:hidden" title="<%= current_user.full_name %>" aria-label="Open account menu"><%= current_user.initials %></summary>
+
+        <%# Avatar menu: <details> gives us a click-to-open dropdown with no JavaScript. %>
+        <details class="relative group">
+          <summary class="list-none cursor-pointer h-9 w-9 rounded-full bg-panel border border-line text-xs font-extrabold text-ink flex items-center justify-center hover:border-royal select-none [&::-webkit-details-marker]:hidden"
+                   title="<%= current_user.full_name %>" aria-label="Open account menu">
+            <%= current_user.initials %>
+          </summary>
           <div class="absolute right-0 mt-2 w-56 rounded-xl border border-line bg-deep shadow-xl shadow-black/40 p-1.5 z-50">
             <p class="px-3 pt-2 pb-1 text-xs text-mute truncate"><%= current_user.full_name %></p>
             <%= link_to "My Profile", my_plan_path, class: "block rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel" %>
             <%= link_to "Account Settings", edit_user_registration_path, class: "block rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel" %>
             <div class="my-1 border-t border-line"></div>
-            <%= button_to "Sign out", destroy_user_session_path, method: :delete, data: { turbo: false }, class: "w-full text-left rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel", form_class: "block" %>
+            <%= button_to "Sign out", destroy_user_session_path, method: :delete, data: { turbo: false },
+                  class: "w-full text-left rounded-lg px-3 py-2 text-sm text-ink hover:bg-panel", form_class: "block" %>
           </div>
         </details>
       <% else %>

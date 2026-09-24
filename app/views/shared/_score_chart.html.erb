@@ -1,0 +1,12 @@
+<%# ranked: [[category, pct], ...] high→low; highlight: how many top rows to colour blue; label: optional prefix %>
+<ul class="mt-4 space-y-2.5">
+  <% ranked.each_with_index do |(cat, score), i| %>
+    <li class="grid grid-cols-[minmax(0,10rem)_1fr_2.5rem] items-center gap-3 text-sm">
+      <span class="truncate <%= i < highlight ? 'font-bold text-ink' : 'text-mute' %>" title="<%= cat %>"><%= cat %></span>
+      <div class="bar h-2.5" role="img" aria-label="<%= cat %> <%= score %> percent">
+        <span class="<%= i < highlight ? '' : '!bg-line' %>" style="width:<%= score %>%"></span>
+      </div>
+      <span class="text-right tabular-nums <%= i < highlight ? 'text-glow font-bold' : 'text-mute' %>"><%= score %>%</span>
+    </li>
+  <% end %>
+</ul>

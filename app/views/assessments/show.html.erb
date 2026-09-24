@@ -4,7 +4,7 @@
   <h1 class="h-step text-center mt-1"><%= @assessment.title %></h1>
   <p class="lead text-center mt-3 max-w-[60ch] mx-auto"><%= @assessment.intro.presence || @assessment.description %></p>
 
-  <%= form_with url: assessment_path(@assessment), method: :post, class: "card mt-8 p-5 md:p-8",
+  <%= form_with url: submit_assessment_path(@assessment), method: :post, class: "card mt-8 p-5 md:p-8",
         data: { controller: "assessment", assessment_total_value: @questions.size, action: "change->assessment#update" } do |f| %>
     <p class="text-sm text-mute mb-6">Answer honestly, not aspirationally. There are no wrong answers. Scale: <%= AssessmentResult::SCALE.values.join(" · ") %>.</p>
     <ol class="space-y-7">

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title><%= page_title("Admin") %></title>
     <%= csrf_meta_tags %>
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -12,7 +16,7 @@
   <body class="min-h-full flex flex-col">
     <header class="border-b border-line">
       <div class="mx-auto max-w-6xl px-5 h-14 flex items-center gap-6 text-sm font-semibold">
-        <%= link_to "All In · Admin", admin_root_path, class: "font-extrabold text-ink" %>
+        <%= link_to admin_root_path, class: "flex items-center gap-2 font-extrabold text-ink" do %><%= image_tag "ec-logo-ring.png", alt: "", class: "h-8 w-8" %> All In · Admin<% end %>
         <%= link_to "People", admin_users_path, class: "btn-link" %>
         <%= link_to "Insights", admin_insights_path, class: "btn-link" %>
         <%= link_to "Lessons", admin_lessons_path, class: "btn-link" %>
