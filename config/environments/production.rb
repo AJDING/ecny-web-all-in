@@ -1,5 +1,24 @@
 require "active_support/core_ext/integer/time"
+
+# Any request that arrives on the Render-generated hostname is permanently redirected
+# to the church URL (APP_HOST), keeping the path. Health checks on /up are left alone.
+class CanonicalHostRedirect
+  def initialize(app)
+    @app = app
+  end
+
+  def call(env)
+    req = Rack::Request.new(env)
+    canonical = ENV["APP_HOST"].to_s
+    if !canonical.empty? && req.host != canonical && req.host.end_with?(".onrender.com") && req.path != "/up"
+      location = "https://" + canonical + req.fullpath
+      return [301, { "Location" => location, "Content-Type" => "text/plain", "Content-Length" => "0" }, []]
+    end
+    @app.call(env)
+  end
+end
 Rails.application.configure do
+  config.middleware.insert_before 0, CanonicalHostRedirect
   config.enable_reloading = false
   config.eager_load = true
   config.consider_all_requests_local = false
