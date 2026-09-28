@@ -1,12 +1,14 @@
 <%# Pie of "capacity share": each slice = that category's score as a portion of the person's total.
-    ranked: [[label, score], ...] high→low. Pure SVG, no JavaScript. %>
+    ranked: [[label, score], ...] high→low. Pure SVG + a small Stimulus controller for the tooltip. %>
 <% total = ranked.sum { |_, s| s.to_f }; total = 1.0 if total.zero? %>
 <% palette = %w[#3B6FE8 #5B8CFF #8FB3FF #2F52B8 #7C6CF2 #A78BFA #4CC3E6 #6FD1C4 #3F7FCB #9DB4E8 #6B7FD6 #B7C7F0 #24408F #C4B5FD #59A0FF #7FDDF0] %>
 <% cx, cy, r = 100, 100, 88; angle = -90.0 %>
-<div class="mt-6 grid gap-6 md:grid-cols-[220px_1fr] md:items-center">
-  <svg viewBox="0 0 200 200" class="w-[220px] h-[220px] mx-auto" role="img" aria-label="Share of capacity across categories">
+<div class="relative mt-6 grid gap-6 md:grid-cols-[220px_1fr] md:items-center" data-controller="pie">
+  <svg viewBox="0 0 200 200" class="w-[220px] h-[220px] mx-auto overflow-visible" role="img" aria-label="Share of capacity across categories" data-pie-target="svg">
     <% if ranked.size == 1 %>
-      <circle cx="<%= cx %>" cy="<%= cy %>" r="<%= r %>" fill="<%= palette[0] %>"><title><%= ranked[0][0] %>: 100%</title></circle>
+      <circle cx="<%= cx %>" cy="<%= cy %>" r="<%= r %>" fill="<%= palette[0] %>" class="pie-slice"
+              data-index="0" data-label="<%= ranked[0][0] %>" data-share="100" data-score="<%= ranked[0][1] %>"
+              data-action="mouseenter->pie#show mousemove->pie#move mouseleave->pie#hide click->pie#toggle"/>
     <% else %>
       <% ranked.each_with_index do |(label, score), i| %>
         <% sweep = 360.0 * score.to_f / total %>
@@ -14,23 +16,37 @@
         <% x1 = cx + r * Math.cos(a1); y1 = cy + r * Math.sin(a1); x2 = cx + r * Math.cos(a2); y2 = cy + r * Math.sin(a2) %>
         <% large = sweep > 180 ? 1 : 0 %>
         <path d="M<%= cx %> <%= cy %> L<%= x1.round(2) %> <%= y1.round(2) %> A<%= r %> <%= r %> 0 <%= large %> 1 <%= x2.round(2) %> <%= y2.round(2) %> Z"
-              fill="<%= palette[i % palette.size] %>" stroke="#0B1326" stroke-width="1.5">
-          <title><%= label %>: <%= (100.0 * score / total).round(1) %>% of your total</title>
-        </path>
+              fill="<%= palette[i % palette.size] %>" stroke="#0B1326" stroke-width="1.5" class="pie-slice"
+              data-index="<%= i %>" data-label="<%= label %>" data-share="<%= (100.0 * score / total).round(1) %>" data-score="<%= score %>"
+              data-action="mouseenter->pie#show mousemove->pie#move mouseleave->pie#hide click->pie#toggle"/>
         <% angle += sweep %>
       <% end %>
     <% end %>
-    <circle cx="<%= cx %>" cy="<%= cy %>" r="34" fill="#0B1326"/>
-    <text x="100" y="97" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif">your</text>
-    <text x="100" y="109" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif">capacity</text>
+    <circle cx="<%= cx %>" cy="<%= cy %>" r="34" fill="#0B1326" pointer-events="none"/>
+    <text x="100" y="97" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif" pointer-events="none">your</text>
+    <text x="100" y="109" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif" pointer-events="none">capacity</text>
   </svg>
+
   <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
     <% ranked.each_with_index do |(label, score), i| %>
-      <li class="flex items-center gap-2 min-w-0">
+      <li class="pie-legend flex items-center gap-2 min-w-0 rounded px-1 -mx-1 transition-colors" data-index="<%= i %>"
+          data-label="<%= label %>" data-share="<%= (100.0 * score / total).round(1) %>" data-score="<%= score %>"
+          data-action="mouseenter->pie#show mousemove->pie#move mouseleave->pie#hide">
         <span class="h-2.5 w-2.5 shrink-0 rounded-sm" style="background:<%= palette[i % palette.size] %>"></span>
-        <span class="truncate text-ink/90" title="<%= label %>"><%= label %></span>
+        <span class="truncate text-ink/90"><%= label %></span>
         <span class="ml-auto tabular-nums text-mute"><%= (100.0 * score / total).round %>%</span>
       </li>
     <% end %>
   </ul>
+
+  <%# Tooltip card: positioned by the controller, hidden until a slice or legend row is hovered/tapped. %>
+  <div data-pie-target="tip" role="tooltip" aria-hidden="true"
+       class="pointer-events-none absolute z-30 hidden w-56 rounded-xl border border-royal/60 bg-deep shadow-xl shadow-black/50 p-3 text-sm">
+    <div class="flex items-center gap-2">
+      <span data-pie-target="swatch" class="h-3 w-3 rounded-sm shrink-0"></span>
+      <span data-pie-target="label" class="font-bold text-ink truncate"></span>
+    </div>
+    <p class="mt-1.5 text-glow font-semibold"><span data-pie-target="share"></span> of your total</p>
+    <p class="text-xs text-mute">Scored <span data-pie-target="score"></span> of the maximum for this category</p>
+  </div>
 </div>
