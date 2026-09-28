@@ -48,13 +48,17 @@ class Admin::InsightsController < Admin::BaseController
     AssessmentResult.where.not(completed_at: nil).includes(:assessment, :user).to_a
   end
 
-  # One row per category: label, avg (0-100), n, top 3 people by score, learn-more count.
+  # Only people at or above this score are listed as "greatest capacity" for a category.
+  CAPACITY_THRESHOLD = 99
+
+  # One row per category: label, avg (0-100), n, everyone at/above the threshold (high→low), learn-more count.
   def category_rows(assessment, rs, label_suffix: "")
     assessment.categories.keys.map do |cat|
       scored = rs.map { |r| [r.user, r.scores[cat]] }.reject { |_, s| s.nil? }
       avg    = scored.empty? ? 0 : (scored.sum { |_, s| s }.to_f / scored.size).round
-      top    = scored.sort_by { |_, s| -s }.first(3)
-      { assessment: assessment, category: cat, label: "#{cat}#{label_suffix}", avg: avg, n: scored.size, top: top }
+      top    = scored.select { |_, s| s >= CAPACITY_THRESHOLD }.sort_by { |u, s| [-s, u.last_name.to_s, u.first_name.to_s] }
+      best   = scored.max_by { |_, s| s }&.last
+      { assessment: assessment, category: cat, label: "#{cat}#{label_suffix}", avg: avg, n: scored.size, top: top, best: best }
     end
   end
 end

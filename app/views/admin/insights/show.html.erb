@@ -22,7 +22,7 @@
 
   <section class="card mt-6 p-6">
     <h2 class="text-lg font-extrabold">Greatest capacity, by category</h2>
-    <p class="text-mute text-sm mt-1">The three people with the highest score in each category — your first call when a team needs someone with that strength.</p>
+    <p class="text-mute text-sm mt-1">Everyone scoring <%= Admin::InsightsController::CAPACITY_THRESHOLD %>% or higher in each category — your first calls when a team needs someone with that strength. Names wrap as the list grows.</p>
     <table class="mt-4 w-full text-sm">
       <thead class="text-mute text-left">
         <tr><th class="py-2">Category</th><th class="text-right pr-6">Avg</th><th>Highest capacity</th><th class="text-right">Want to learn more</th></tr>
@@ -32,14 +32,19 @@
           <tr class="border-t border-line align-top">
             <td class="py-2.5 font-semibold"><%= row[:label] %></td>
             <td class="py-2.5 text-right pr-6 text-glow tabular-nums"><%= row[:avg] %>%</td>
-            <td class="py-2.5">
-              <% if row[:top].empty? %><span class="text-mute">—</span><% end %>
-              <% row[:top].each_with_index do |(user, score), i| %>
-                <span class="inline-flex items-center gap-1.5 mr-3 whitespace-nowrap">
-                  <span class="text-mute text-xs"><%= i + 1 %>.</span>
-                  <%= link_to user.full_name, admin_user_path(user), class: "text-ink hover:text-glow" %>
-                  <span class="text-mute tabular-nums"><%= score %>%</span>
-                </span>
+            <td class="py-2.5 pr-4">
+              <% if row[:top].empty? %>
+                <span class="text-mute text-xs">No one at <%= Admin::InsightsController::CAPACITY_THRESHOLD %>%+ yet<%= " (best so far #{row[:best]}%)" if row[:best] %></span>
+              <% else %>
+                <div class="flex flex-wrap gap-1.5 max-w-2xl">
+                  <% row[:top].each do |user, score| %>
+                    <%= link_to admin_user_path(user), class: "inline-flex items-center gap-1.5 rounded-md border border-line bg-panel/60 px-2 py-1 text-xs hover:border-royal whitespace-nowrap" do %>
+                      <span class="text-ink font-semibold"><%= user.full_name %></span>
+                      <span class="text-glow tabular-nums"><%= score %>%</span>
+                    <% end %>
+                  <% end %>
+                </div>
+                <% if row[:top].size > 1 %><p class="text-xs text-mute mt-1"><%= row[:top].size %> people</p><% end %>
               <% end %>
             </td>
             <td class="py-2.5 text-right text-mute"><%= @interest_counts[[row[:assessment].id, row[:category]]].to_i %></td>
