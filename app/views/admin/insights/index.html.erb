@@ -1,5 +1,5 @@
 <h1 class="text-2xl font-extrabold">Insights</h1>
-<p class="text-mute text-sm mt-1">Everyone who has registered, and how the whole pool scores across every category.</p>
+<p class="text-mute text-sm mt-1">Aggregate results for everyone who has registered. Each report below shows the average per category across all completed assessments, the capacity pie, and who scores highest in each category.</p>
 
 <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <% [["Registered", @people_total], ["Finished Step One", @step_one_done], ["Finished all assessments", @all_three_done], ["RSVP'd / attended", @rsvps]].each do |label, n| %>
@@ -7,32 +7,22 @@
   <% end %>
 </div>
 
-<% @assessments.each do |a| %>
-  <% rows = @category_stats[a.id]; n = (@results_by_assmt[a.id] || []).size %>
-  <section class="card mt-8 p-6">
-    <div class="flex items-baseline justify-between gap-4">
-      <h2 class="text-lg font-extrabold"><%= a.title %></h2>
-      <span class="text-sm text-mute"><%= n %> completed</span>
-    </div>
-    <% if n.zero? %>
-      <p class="text-mute text-sm mt-3">No one has completed this yet.</p>
-    <% else %>
-      <table class="mt-4 w-full text-sm">
-        <thead class="text-mute text-left">
-          <tr><th class="py-2 w-1/4">Category</th><th class="w-2/5">Average score (all people)</th><th class="text-right">In someone's top <%= a.top_n %></th><th class="text-right">Want to learn more</th></tr>
-        </thead>
-        <tbody>
-          <% rows.each do |cat, avg, _cnt, tops, learn| %>
-            <tr class="border-t border-line">
-              <td class="py-2 font-semibold"><%= cat %></td>
-              <td><div class="flex items-center gap-3"><div class="bar flex-1"><span style="width:<%= avg %>%"></span></div><span class="w-10 text-right text-glow"><%= avg %>%</span></div></td>
-              <td class="text-right"><%= tops %> <span class="text-mute">(<%= (tops * 100.0 / n).round %>%)</span></td>
-              <td class="text-right"><%= learn %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <p class="text-xs text-mute mt-3">Highest average = where the pool is strongest; "want to learn more" = demand for a future class.</p>
+<h2 class="text-lg font-extrabold mt-10">Reports</h2>
+<div class="mt-3 grid gap-4 md:grid-cols-2">
+  <% @assessments.each do |a| %>
+    <%= link_to admin_insight_path(a.slug), class: "card p-5 hover:border-royal transition-colors block" do %>
+      <div class="flex items-baseline justify-between gap-4">
+        <h3 class="font-extrabold text-ink"><%= a.title %></h3>
+        <span class="text-sm text-mute"><%= @completed_by[a.id].to_i %> completed</span>
+      </div>
+      <p class="text-sm text-mute mt-1"><%= a.categories.size %> categories · averages, capacity pie, top people per category</p>
     <% end %>
-  </section>
-<% end %>
+  <% end %>
+  <%= link_to admin_insight_path("full-design"), class: "card p-5 hover:border-royal transition-colors block border-royal/40" do %>
+    <div class="flex items-baseline justify-between gap-4">
+      <h3 class="font-extrabold text-ink">Full design (everyone)</h3>
+      <span class="text-sm text-mute"><%= @all_three_done %> finished all three</span>
+    </div>
+    <p class="text-sm text-mute mt-1">All categories from all assessments on one scale — the church-wide picture</p>
+  <% end %>
+</div>

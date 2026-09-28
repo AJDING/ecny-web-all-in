@@ -1,0 +1,8 @@
+In config/routes.rb, inside `namespace :admin do`, replace:
+
+    get "insights", to: "insights#index"
+
+with:
+
+    get "insights",     to: "insights#index"
+    get "insights/:id", to: "insights#show", as: :insight

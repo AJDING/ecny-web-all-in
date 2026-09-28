@@ -1,0 +1,51 @@
+<p><%= link_to "← Insights", admin_insights_path, class: "btn-link" %></p>
+<div class="flex flex-wrap items-baseline justify-between gap-3 mt-2">
+  <h1 class="text-2xl font-extrabold"><%= @title %></h1>
+  <span class="text-sm text-mute"><%= @count %> <%= @full ? "people with results" : "completed" %></span>
+</div>
+<p class="text-mute text-sm mt-1"><%= @subtitle %></p>
+
+<% if @count.zero? %>
+  <div class="card mt-8 p-8 text-center text-mute">No one has completed this yet.</div>
+<% else %>
+  <% ranked = @rows.map { |r| [r[:label], r[:avg]] } %>
+
+  <section class="card mt-6 p-6">
+    <h2 class="text-lg font-extrabold">Average score per category</h2>
+    <p class="text-mute text-sm mt-1">Highest average = where the whole pool is strongest. <% if @full %>Top 12 shown; the pie and the table below include all <%= ranked.size %>.<% end %></p>
+    <%= render "shared/score_chart", ranked: (@full ? ranked.first(12) : ranked), highlight: @top_n %>
+
+    <h3 class="text-xs font-bold text-mute mt-8 tracking-[.2em] uppercase">The pool's capacity, as portions</h3>
+    <%= render "shared/share_pie", ranked: ranked %>
+    <p class="text-xs text-mute mt-3">Each slice is that category's average as a share of the sum of all averages — the same "portions of one whole" view people see on their own results, applied to everyone at once.</p>
+  </section>
+
+  <section class="card mt-6 p-6">
+    <h2 class="text-lg font-extrabold">Greatest capacity, by category</h2>
+    <p class="text-mute text-sm mt-1">The three people with the highest score in each category — your first call when a team needs someone with that strength.</p>
+    <table class="mt-4 w-full text-sm">
+      <thead class="text-mute text-left">
+        <tr><th class="py-2">Category</th><th class="text-right pr-6">Avg</th><th>Highest capacity</th><th class="text-right">Want to learn more</th></tr>
+      </thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <tr class="border-t border-line align-top">
+            <td class="py-2.5 font-semibold"><%= row[:label] %></td>
+            <td class="py-2.5 text-right pr-6 text-glow tabular-nums"><%= row[:avg] %>%</td>
+            <td class="py-2.5">
+              <% if row[:top].empty? %><span class="text-mute">—</span><% end %>
+              <% row[:top].each_with_index do |(user, score), i| %>
+                <span class="inline-flex items-center gap-1.5 mr-3 whitespace-nowrap">
+                  <span class="text-mute text-xs"><%= i + 1 %>.</span>
+                  <%= link_to user.full_name, admin_user_path(user), class: "text-ink hover:text-glow" %>
+                  <span class="text-mute tabular-nums"><%= score %>%</span>
+                </span>
+              <% end %>
+            </td>
+            <td class="py-2.5 text-right text-mute"><%= @interest_counts[[row[:assessment].id, row[:category]]].to_i %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
