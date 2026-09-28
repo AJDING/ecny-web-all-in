@@ -41,6 +41,11 @@
       <h2 class="text-lg font-extrabold">Your full design</h2>
       <p class="text-mute text-sm mt-1">Every category from all <%= strengths.size %> assessments on one scale, strongest first (top 12 shown).</p>
       <%= render "shared/score_chart", ranked: combined.first(12), highlight: 5 %>
+
+      <h3 class="text-xs font-bold text-mute mt-8 tracking-[.2em] uppercase">Your capacity, as portions</h3>
+      <p class="text-mute text-sm mt-1">All <%= combined.size %> categories from all three assessments, each sized by its share of your total.</p>
+      <%= render "shared/share_pie", ranked: combined %>
+      <%= render "shared/portions_note" %>
     </section>
 
     <%# ---- Per assessment ---- %>
@@ -64,6 +69,7 @@
         <details class="mt-4">
           <summary class="cursor-pointer text-sm font-semibold text-mute hover:text-ink">All <%= a.categories.size %> categories</summary>
           <%= render "shared/score_chart", ranked: a.ranked(result), highlight: a.top_n %>
+          <%= render "shared/share_pie", ranked: a.ranked(result) %>
         </details>
         <% cats = growth.find { |ga, _| ga.id == a.id }&.last %>
         <% if cats.present? %>

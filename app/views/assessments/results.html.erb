@@ -9,6 +9,10 @@
     <h2 class="text-lg font-extrabold">Your <%= @assessment.title.downcase %> profile</h2>
     <p class="text-mute text-sm mt-1">All <%= @ranked.size %> categories, strongest first. Scores are the percentage of the maximum for that category.</p>
     <%= render "shared/score_chart", ranked: @ranked, highlight: @assessment.top_n %>
+
+    <h3 class="text-xs font-bold text-mute mt-8 tracking-[.2em] uppercase">Your capacity, as portions</h3>
+    <%= render "shared/share_pie", ranked: @ranked %>
+    <%= render "shared/portions_note" %>
   </section>
 
   <h2 class="kicker mt-10 text-center">YOUR TOP <%= @assessment.top_n %></h2>

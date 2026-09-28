@@ -1,0 +1,36 @@
+<%# Pie of "capacity share": each slice = that category's score as a portion of the person's total.
+    ranked: [[label, score], ...] high→low. Pure SVG, no JavaScript. %>
+<% total = ranked.sum { |_, s| s.to_f }; total = 1.0 if total.zero? %>
+<% palette = %w[#3B6FE8 #5B8CFF #8FB3FF #2F52B8 #7C6CF2 #A78BFA #4CC3E6 #6FD1C4 #3F7FCB #9DB4E8 #6B7FD6 #B7C7F0 #24408F #C4B5FD #59A0FF #7FDDF0] %>
+<% cx, cy, r = 100, 100, 88; angle = -90.0 %>
+<div class="mt-6 grid gap-6 md:grid-cols-[220px_1fr] md:items-center">
+  <svg viewBox="0 0 200 200" class="w-[220px] h-[220px] mx-auto" role="img" aria-label="Share of capacity across categories">
+    <% if ranked.size == 1 %>
+      <circle cx="<%= cx %>" cy="<%= cy %>" r="<%= r %>" fill="<%= palette[0] %>"><title><%= ranked[0][0] %>: 100%</title></circle>
+    <% else %>
+      <% ranked.each_with_index do |(label, score), i| %>
+        <% sweep = 360.0 * score.to_f / total %>
+        <% a1 = angle * Math::PI / 180; a2 = (angle + sweep) * Math::PI / 180 %>
+        <% x1 = cx + r * Math.cos(a1); y1 = cy + r * Math.sin(a1); x2 = cx + r * Math.cos(a2); y2 = cy + r * Math.sin(a2) %>
+        <% large = sweep > 180 ? 1 : 0 %>
+        <path d="M<%= cx %> <%= cy %> L<%= x1.round(2) %> <%= y1.round(2) %> A<%= r %> <%= r %> 0 <%= large %> 1 <%= x2.round(2) %> <%= y2.round(2) %> Z"
+              fill="<%= palette[i % palette.size] %>" stroke="#0B1326" stroke-width="1.5">
+          <title><%= label %>: <%= (100.0 * score / total).round(1) %>% of your total</title>
+        </path>
+        <% angle += sweep %>
+      <% end %>
+    <% end %>
+    <circle cx="<%= cx %>" cy="<%= cy %>" r="34" fill="#0B1326"/>
+    <text x="100" y="97" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif">your</text>
+    <text x="100" y="109" text-anchor="middle" font-size="9" fill="#9AA8C7" font-family="Manrope, sans-serif">capacity</text>
+  </svg>
+  <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+    <% ranked.each_with_index do |(label, score), i| %>
+      <li class="flex items-center gap-2 min-w-0">
+        <span class="h-2.5 w-2.5 shrink-0 rounded-sm" style="background:<%= palette[i % palette.size] %>"></span>
+        <span class="truncate text-ink/90" title="<%= label %>"><%= label %></span>
+        <span class="ml-auto tabular-nums text-mute"><%= (100.0 * score / total).round %>%</span>
+      </li>
+    <% end %>
+  </ul>
+</div>
