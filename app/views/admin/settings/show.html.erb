@@ -4,13 +4,14 @@
 <%= form_with url: admin_settings_path, method: :patch, class: "card mt-6 p-6 max-w-xl space-y-5" do |f| %>
   <div>
     <%= f.label "settings[font]", "Text font", class: "label" %>
-    <%= f.select "settings[font]", SiteSetting::FONTS.map { |key, (label, _)| [label, key] }, { selected: @font }, class: "field" %>
+    <%= f.select "settings[font]", SiteSetting::FONTS.map { |key, opt| [opt[:label], key] }, { selected: @font }, class: "field" %>
     <p class="text-xs text-mute mt-2">Preview of each option:</p>
     <ul class="mt-2 space-y-2">
-      <% SiteSetting::FONTS.each do |key, (label, stack)| %>
-        <li class="rounded-lg border border-line bg-panel/50 px-4 py-3" style="font-family: <%= stack %>;">
-          <span class="text-xs text-mute block" style="font-family: Manrope, sans-serif;"><%= label %></span>
-          <span class="text-base">One encounter with Jesus will change your life forever. 0123456789</span>
+      <% SiteSetting::FONTS.each do |key, opt| %>
+        <li class="rounded-lg border px-4 py-3 <%= key == @font ? 'border-royal bg-royalink/20' : 'border-line bg-panel/50' %>"
+            style="font-family: <%= opt[:family] %>; font-size: <%= opt[:size] %>; line-height: <%= opt[:line_height] %>;">
+          <span class="text-xs text-mute block" style="font-family: Manrope, sans-serif;"><%= opt[:label] %><%= " · current" if key == @font %></span>
+          One encounter with Jesus will change your life forever. We never want church to feel like a place where you come in on a Sunday and leave.
         </li>
       <% end %>
     </ul>
