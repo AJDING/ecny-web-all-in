@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     root "dashboard#index"
     resources :users, only: [:index, :show]
     get "insights", to: "insights#index"
+        resource :settings, only: [:show, :update]   # site font and other admin-chosen options
         get "insights/:id", to: "insights#show", as: :insight
     resources :lessons, only: [:index, :edit, :update]
     resources :assessments, only: [:index, :show]
