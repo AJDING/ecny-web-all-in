@@ -13,7 +13,7 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="min-h-full flex flex-col">
+  <body class="min-h-full flex flex-col" style="<%= site_font_style %>">
     <header class="border-b border-line">
       <div class="mx-auto max-w-6xl px-5 h-14 flex items-center gap-6 text-sm font-semibold">
         <%= link_to admin_root_path, class: "flex items-center gap-2 font-extrabold text-ink" do %><%= image_tag "ec-logo-ring.png", alt: "", class: "h-8 w-8" %> All In · Admin<% end %>
@@ -22,12 +22,13 @@
         <%= link_to "Lessons", admin_lessons_path, class: "btn-link" %>
         <%= link_to "Assessments", admin_assessments_path, class: "btn-link" %>
         <%= link_to "RSVPs", admin_appointments_path, class: "btn-link" %>
+        <%= link_to "Settings", admin_settings_path, class: "btn-link" %>
         <span class="flex-1"></span>
         <%= link_to "Back to app", root_path, class: "btn-link" %>
       </div>
     </header>
-    <% if notice %><div class="flash-notice"><%= notice %></div><% end %>
-    <% if alert  %><div class="flash-alert"><%= alert %></div><% end %>
+    <% if notice.present? %><div class="flash-notice"><%= notice %></div><% end %>
+    <% if alert.present?  %><div class="flash-alert"><%= alert %></div><% end %>
     <main class="flex-1 py-8"><div class="mx-auto max-w-6xl px-5"><%= yield %></div></main>
   </body>
 </html>

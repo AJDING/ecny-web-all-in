@@ -18,7 +18,7 @@
     <%= javascript_importmap_tags %>
     <script src="https://player.vimeo.com/api/player.js"></script>
   </head>
-  <body class="min-h-full flex flex-col">
+  <body class="min-h-full flex flex-col" style="<%= site_font_style %>">
     <%= render "shared/nav" %>
     <% if notice.present? %><div class="flash-notice"><%= notice %></div><% end %>
     <% if alert.present?  %><div class="flash-alert"><%= alert %></div><% end %>

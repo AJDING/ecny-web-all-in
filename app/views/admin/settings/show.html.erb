@@ -1,0 +1,19 @@
+<h1 class="text-2xl font-extrabold">Site settings</h1>
+<p class="text-mute text-sm mt-1">Choices here apply to the whole site immediately — every page, for every person.</p>
+
+<%= form_with url: admin_settings_path, method: :patch, class: "card mt-6 p-6 max-w-xl space-y-5" do |f| %>
+  <div>
+    <%= f.label "settings[font]", "Text font", class: "label" %>
+    <%= f.select "settings[font]", SiteSetting::FONTS.map { |key, (label, _)| [label, key] }, { selected: @font }, class: "field" %>
+    <p class="text-xs text-mute mt-2">Preview of each option:</p>
+    <ul class="mt-2 space-y-2">
+      <% SiteSetting::FONTS.each do |key, (label, stack)| %>
+        <li class="rounded-lg border border-line bg-panel/50 px-4 py-3" style="font-family: <%= stack %>;">
+          <span class="text-xs text-mute block" style="font-family: Manrope, sans-serif;"><%= label %></span>
+          <span class="text-base">One encounter with Jesus will change your life forever. 0123456789</span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+  <%= f.submit "Save", class: "btn-go" %>
+<% end %>
